@@ -4,18 +4,24 @@
 #include <dirent.h>
 #include <string.h>
 
+static const char run_script[] = "./";
+
+/*Change directory*/
 void change_dir () {
 
 }
 
+/*Clear terminal*/
 void clear () {
   printf("\033[2J\033[1;1H");
-
 }
 
+/*List contents of specified directory*/
 void dir (char * str) {
+  
   DIR *dp;
   struct dirent *ep;
+  
   dp = opendir (str);
 
   if (dp != NULL) {
@@ -28,20 +34,31 @@ void dir (char * str) {
     perror ("Couldn't open the directory");
 }
 
+/*List all environment variables*/
 void environ () {
-  
 
 }
 
-void echo (char str[]) {
+/*Echo command*/
+void echo (char * str) {
   printf ("%s\n", str);
 
 }
 
+/*Run shell script*/
+void shell(char str[]) {
+  char script[1024];
+  strcpy(script, run_script);
+  strcat(script, str);
+  system(script);
+}
+
+/*Show manual*/
 void help () {
 
 }
 
+/*Pause terminal*/
 //Naming to avoid conflict with stdlib.h library
 void shell_pause () {
   for(;;) {
@@ -50,9 +67,9 @@ void shell_pause () {
     if (c == '\n')
       break;
   }
-
 }
 
+/*Quit terminal*/
 void quit () {
   exit(0);
 }
@@ -82,21 +99,16 @@ int main (int argc, char * argv[]) {
     arg = strtok(str_copy, " ");
     strcpy(com, arg);
     arg = strtok(NULL, " "); 
-    // printf("%s\n", arg);
     
-    //Show cwd if only enter pressed
-    //if (strcmp(str, "") == 0)
-    //  continue;
-
-    //cd block
+    //Change directory block
 
     //Clear block
     if (strcmp(str, "clr") == 0)
       clear();
 
     //Dir block
-    //else if (strcmp(str, "dir") == 0)
-    //  dir();
+    else if (strcmp(com, "dir") == 0)
+     dir(arg);
 
     //Environ block
     else if (strcmp(str, "environ") == 0);
@@ -116,6 +128,10 @@ int main (int argc, char * argv[]) {
     else if (strcmp(str, "quit") == 0)
      quit(); 
     
+    //Shell script block
+    else if (strcmp(com, "myshell") == 0)
+      shell(arg);
+
     else {
       printf("\n");
       continue;
