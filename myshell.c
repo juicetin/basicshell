@@ -24,7 +24,7 @@ void clear () {
 }
 
 /*List contents of specified directory*/
-void dir (char * str) {
+void dir (char *str) {
 
   DIR *dp;
   struct dirent *ep;
@@ -34,7 +34,7 @@ void dir (char * str) {
   else {
     dp = opendir (str);
     if (dp != NULL) {
-      while (ep = readdir (dp))
+      while ((ep = readdir (dp)))
         puts (ep->d_name);
 
       (void) closedir (dp);
@@ -50,8 +50,10 @@ void environ () {
 }
 
 /*Echo command*/
-void echo (char * str) {
-  printf ("%s\n", str);
+void echo (int arg_count, char **str) {
+  for (int i = 0; i < arg_count; ++i)
+    printf("%s ", str[i]);
+  printf("\n");
 
 }
 
@@ -101,19 +103,19 @@ int main (int argc, char * argv[]) {
     str[strlen(str) - 1] = '\0';
 
     //Split string
-    char *arg, *command;
+    int arg_count = 0, length = strlen(str);
+    char **arg, *command;
     command = str;
-    for (int i = 0; i < strlen(str); ++i) {
+    for (int i = 0; i < length; ++i) {
       if (str[i] == ' ') {
         str[i] = '\0';
-        arg = str+i+1;
-        break;
+        arg[arg_count++] = str+i+1;
       }
     }
 
     //Change directory block
     if (strcmp(command, "cd") == 0)
-      change_dir(arg);
+      change_dir(arg[0]);
 
     //Clear block
     else if (strcmp(command, "clr") == 0)
@@ -121,14 +123,14 @@ int main (int argc, char * argv[]) {
 
     //Dir block
     else if (strcmp(command, "dir") == 0)
-      dir(arg);
+      dir(arg[0]);
 
     //Environ block
     else if (strcmp(command, "environ") == 0);
 
     //Echo block
     else if (strcmp(command, "echo") == 0)
-      echo(arg);
+      echo(arg_count, arg);
 
     //Help block
     else if (strcmp(command, "help") == 0)
@@ -144,11 +146,12 @@ int main (int argc, char * argv[]) {
 
     //Shell script block
     else if (strcmp(command, "myshell") == 0)
-      shell(arg);
+      shell(arg[0]);
 
     else {
       printf("Command not found: %s\n", command);
     }
+    
     printf("\n");
   }
   return 0;
