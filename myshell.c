@@ -6,8 +6,11 @@
 
 #define GRN  "\x1B[32m"
 #define RESET "\033[0m"
+#define MAGENTA "\x1b[35m"
+#define RED "\x1b[31m"
 
 static const char run_script[] = "./";
+extern char **environ;
 char cwd[1024];
 
 /*Change directory*/
@@ -45,8 +48,10 @@ void dir (char *str) {
 }
 
 /*List all environment variables*/
-void environ () {
-
+void envir_vars () {
+  int i = 0;
+  while (environ[i]) 
+    printf("%s\n", environ[i++]);
 }
 
 /*Echo command*/
@@ -92,13 +97,18 @@ int main (int argc, char * argv[]) {
 
     //Get current directory
     getcwd(cwd, sizeof(cwd));
-    printf("%s%s ~ \n%s$ ", GRN, cwd, RESET); 
+
+    //Get domain
+    char domain_name[255];
+    gethostname(domain_name, 255);
+
+    //Prints -user- in -directory-, colour coded with escape characters
+    printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
+      RED, domain_name, RESET, GRN, cwd, RESET); 
 
     //Read user input
     char str[1024];
     fgets(str, 100, stdin);
-    //scanf("%s", str);
-
     //Remove newline
     str[strlen(str) - 1] = '\0';
 
@@ -111,8 +121,20 @@ int main (int argc, char * argv[]) {
         str[i] = '\0';
         arg[arg_count++] = str+i+1;
       }
+      //Stdin
+      else if (str[i] == '<') {
+
+      }
+      //Write to file
+      else if (str[i] == '>') {
+        //Append to file
+        if (str[i+1] == '>'){}
+      }
     }
 
+    /**
+    ** Commands
+    **/
     //Change directory block
     if (strcmp(command, "cd") == 0)
       change_dir(arg[0]);
@@ -126,7 +148,8 @@ int main (int argc, char * argv[]) {
       dir(arg[0]);
 
     //Environ block
-    else if (strcmp(command, "environ") == 0);
+    else if (strcmp(command, "environ") == 0)
+      envir_vars();
 
     //Echo block
     else if (strcmp(command, "echo") == 0)
