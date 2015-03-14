@@ -7,8 +7,8 @@
 static const char run_script[] = "./";
 
 /*Change directory*/
-void change_dir () {
-
+void change_dir (char * str) {
+  
 }
 
 /*Clear terminal*/
@@ -101,6 +101,8 @@ int main (int argc, char * argv[]) {
     arg = strtok(NULL, " "); 
     
     //Change directory block
+    if (strcmp(com, "cd") == 0)
+      change_dir(arg);
 
     //Clear block
     if (strcmp(str, "clr") == 0)
