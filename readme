@@ -1,0 +1,15 @@
+
+cd <directory>
+    Changes the current default directory to <directory>. If the <directory> argument is not present, 
+    the current working directory will be printed. An invalid <directory> will result in the user being 
+    prompted so.
+
+clr
+    Clears the terminal screen.
+
+dir <directory>
+    Lists the contents of the directory <directory>.
+
+environ
+	Lists all environment variables
+

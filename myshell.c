@@ -65,6 +65,7 @@ void shell(char str[]) {
 
 /*Show manual*/
 void help () {
+  system("cat readme");
 
 }
 
@@ -73,7 +74,6 @@ void help () {
 void shell_pause () {
   for(;;) {
     char c = getchar();
-    c = getchar();
     if (c == '\n')
       break;
   }
@@ -86,7 +86,7 @@ void quit () {
 
 int main (int argc, char * argv[]) {
 
-  for (;;) {
+  while (1) {
 
     //Get current directory
     getcwd(cwd, sizeof(cwd));
@@ -101,20 +101,22 @@ int main (int argc, char * argv[]) {
     str[strlen(str) - 1] = '\0';
 
     //Split string
-    char str_copy[1024];
-    strcpy(str_copy, str);
-    char * arg;
-    char command[1024];
-    arg = strtok(str_copy, " ");
-    strcpy(command, arg);
-    arg = strtok(NULL, " "); 
+    char *arg, *command;
+    command = str;
+    for (int i = 0; i < strlen(str); ++i) {
+      if (str[i] == ' ') {
+        str[i] = '\0';
+        arg = str+i+1;
+        break;
+      }
+    }
 
     //Change directory block
     if (strcmp(command, "cd") == 0)
       change_dir(arg);
 
     //Clear block
-    if (strcmp(command, "clr") == 0)
+    else if (strcmp(command, "clr") == 0)
       clear();
 
     //Dir block
@@ -129,7 +131,8 @@ int main (int argc, char * argv[]) {
       echo(arg);
 
     //Help block
-    else if (strcmp(command, "help") == 0);
+    else if (strcmp(command, "help") == 0)
+      help();
 
     //Pause block
     else if (strcmp(command, "pause") == 0)
