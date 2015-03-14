@@ -5,10 +5,14 @@
 #include <string.h>
 
 static const char run_script[] = "./";
+char cwd[1024];
 
 /*Change directory*/
 void change_dir (char * str) {
-  
+  if (str == NULL)
+    printf("No directory entered. Current directory is: %s\n", cwd);
+  else if (chdir(str) != 0)
+    printf("Directory does not exist. Please enter a valid directory.\n");
 }
 
 /*Clear terminal*/
@@ -18,20 +22,23 @@ void clear () {
 
 /*List contents of specified directory*/
 void dir (char * str) {
-  
+
   DIR *dp;
   struct dirent *ep;
-  
-  dp = opendir (str);
 
-  if (dp != NULL) {
-    while (ep = readdir (dp))
-      puts (ep->d_name);
+  if (str == NULL)
+    printf("Please enter a directory to list the files of.\n");
+  else {
+    dp = opendir (str);
+    if (dp != NULL) {
+      while (ep = readdir (dp))
+        puts (ep->d_name);
 
-    (void) closedir (dp);
+      (void) closedir (dp);
+    }
+    else
+      perror ("Couldn't open the directory");
   }
-  else
-    perror ("Couldn't open the directory");
 }
 
 /*List all environment variables*/
@@ -75,11 +82,10 @@ void quit () {
 }
 
 int main (int argc, char * argv[]) {
-  
+
   for (;;) {
-    
+
     //Get current directory
-    char cwd[1024];
     getcwd(cwd, sizeof(cwd));
     printf("%s ~ \n$ ", cwd); 
 
@@ -95,43 +101,43 @@ int main (int argc, char * argv[]) {
     char str_copy[1024];
     strcpy(str_copy, str);
     char * arg;
-    char com[1024];
+    char command[1024];
     arg = strtok(str_copy, " ");
-    strcpy(com, arg);
+    strcpy(command, arg);
     arg = strtok(NULL, " "); 
-    
+
     //Change directory block
-    if (strcmp(com, "cd") == 0)
+    if (strcmp(command, "cd") == 0)
       change_dir(arg);
 
     //Clear block
-    if (strcmp(str, "clr") == 0)
+    if (strcmp(command, "clr") == 0)
       clear();
 
     //Dir block
-    else if (strcmp(com, "dir") == 0)
-     dir(arg);
+    else if (strcmp(command, "dir") == 0)
+      dir(arg);
 
     //Environ block
-    else if (strcmp(str, "environ") == 0);
+    else if (strcmp(command, "environ") == 0);
 
     //Echo block
-    else if (strcmp(com, "echo") == 0)
+    else if (strcmp(command, "echo") == 0)
       echo(arg);
 
     //Help block
-    else if (strcmp(str, "help") == 0);
+    else if (strcmp(command, "help") == 0);
 
     //Pause block
-    else if (strcmp(str, "pause") == 0)
+    else if (strcmp(command, "pause") == 0)
       shell_pause();
 
     //Quit block
-    else if (strcmp(str, "quit") == 0)
-     quit(); 
-    
+    else if (strcmp(command, "quit") == 0)
+      quit(); 
+
     //Shell script block
-    else if (strcmp(com, "myshell") == 0)
+    else if (strcmp(command, "myshell") == 0)
       shell(arg);
 
     else {
