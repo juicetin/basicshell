@@ -4,6 +4,9 @@
 #include <dirent.h>
 #include <string.h>
 
+#define GRN  "\x1B[32m"
+#define RESET "\033[0m"
+
 static const char run_script[] = "./";
 char cwd[1024];
 
@@ -87,7 +90,7 @@ int main (int argc, char * argv[]) {
 
     //Get current directory
     getcwd(cwd, sizeof(cwd));
-    printf("%s ~ \n$ ", cwd); 
+    printf("%s%s ~ \n%s$ ", GRN, cwd, RESET); 
 
     //Read user input
     char str[1024];
@@ -141,8 +144,7 @@ int main (int argc, char * argv[]) {
       shell(arg);
 
     else {
-      printf("\n");
-      continue;
+      printf("Command not found: %s\n", command);
     }
     printf("\n");
   }
