@@ -1,3 +1,18 @@
+jtin2945-shell
+
+Name
+	jtin2945-shell
+
+Description
+	jtin2945-shell, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the University of Sydney.
+
+Options
+	Unfortunately, I did not implement options...D=
+
+
+
+Reference
+The following sections of the manual describe the available built in commands.
 
 cd <directory>
     Changes the current default directory to <directory>. If the <directory> argument is not present, 
@@ -13,3 +28,14 @@ dir <directory>
 environ
 	Lists all environment variables
 
+echo <comment>
+	Displays <comment< on the display followed by a new line (where multiple spaces/tabs are reduced to a single space)
+
+help
+	Display the user manual, using the more filter
+
+pause
+	Pause operation of the Shell until the 'Enter' key is pressed
+
+quit
+	Quits the shell

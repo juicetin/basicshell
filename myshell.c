@@ -64,6 +64,19 @@ void echo (int arg_count, char **str) {
 
 /*Run shell script*/
 void shell(char str[]) {
+
+  if (str == NULL) {
+    while (str == NULL) {
+      printf("Please enter a valid script or type exit to return to the shell.\n");
+      fgets(str, 1024, stdin);
+      //Remove newline
+      str[strlen(str) - 1] = '\0';
+      if (strcmp(str, "exit") == 0)
+        return;
+    }
+    printf("derp\n");
+  }
+
   char script[1024];
   strcpy(script, run_script);
   strcat(script, str);
@@ -93,42 +106,55 @@ void quit () {
 
 int main (int argc, char * argv[]) {
 
+  // // Get domain - seems to cause crashes when executing certain commands...
+  // char domain_name[1024];
+  // gethostname(domain_name, 1024);
+
   while (1) {
 
     //Get current directory
     getcwd(cwd, sizeof(cwd));
 
-    //Get domain
-    char domain_name[255];
-    gethostname(domain_name, 255);
-
-    //Prints -user- in -directory-, colour coded with escape characters
-    printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
-      RED, domain_name, RESET, GRN, cwd, RESET); 
+    // //Prints -user- in -directory-, colour coded with escape characters
+    // printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
+    //   RED, domain_name, RESET, GRN, cwd, RESET); 
+    printf("%s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
+      RESET, GRN, cwd, RESET);  
 
     //Read user input
     char str[1024];
-    fgets(str, 100, stdin);
+    fgets(str, 1024, stdin);
     //Remove newline
     str[strlen(str) - 1] = '\0';
 
     //Split string
     int arg_count = 0, length = strlen(str);
     char **arg, *command;
+    int redir_check = 0;
     command = str;
     for (int i = 0; i < length; ++i) {
-      if (str[i] == ' ') {
+      if (str[i] == ' ' && redir_check == 0) {
         str[i] = '\0';
         arg[arg_count++] = str+i+1;
       }
+
       //Stdin
       else if (str[i] == '<') {
-
+        redir_check = 1;
+        str[i] = '\0';
       }
+
       //Write to file
       else if (str[i] == '>') {
         //Append to file
-        if (str[i+1] == '>'){}
+        str[i] = '\0';
+        redir_check = 1;
+        if (str[i+1] == '>') {
+          str[i+1] = '\0';
+        }
+        else {
+          
+        }
       }
     }
 
@@ -144,19 +170,19 @@ int main (int argc, char * argv[]) {
       clear();
 
     //Dir block
-    else if (strcmp(command, "dir") == 0)
+    else if (strcmp(command, "dir") == 0 && redir_check == 0)
       dir(arg[0]);
 
     //Environ block
-    else if (strcmp(command, "environ") == 0)
+    else if (strcmp(command, "environ") == 0 && redir_check == 0)
       envir_vars();
 
     //Echo block
-    else if (strcmp(command, "echo") == 0)
+    else if (strcmp(command, "echo") == 0 && redir_check == 0)
       echo(arg_count, arg);
 
     //Help block
-    else if (strcmp(command, "help") == 0)
+    else if (strcmp(command, "help") == 0 && redir_check == 0)
       help();
 
     //Pause block
@@ -168,7 +194,7 @@ int main (int argc, char * argv[]) {
       quit(); 
 
     //Shell script block
-    else if (strcmp(command, "myshell") == 0)
+    else if (strcmp(command, "myshell") == 0 && redir_check == 0)
       shell(arg[0]);
 
     else {
