@@ -13,6 +13,24 @@ static const char run_script[] = "./";
 extern char **environ;
 char cwd[1024];
 
+/*Split string*/
+void split (int arg_count, char **args, char * token) {
+  while (token != NULL) {
+
+      args[arg_count++] = token;
+      token = strtok (NULL, " ");
+      printf("%s\n", args[arg_count-1]);
+    }
+
+    for (int i = 0; i < arg_count; ++i) {
+      if (strcmp(args[i], "<") == 0 ||
+        strcmp(args[i], ">") == 0 ||
+        strcmp(args[i], ">>") == 0)
+        arg_count = i; 
+    }
+    printf("%d\n", arg_count);
+}
+
 /*Change directory*/
 void change_dir (char * str) {
   if (str == NULL)
@@ -23,7 +41,7 @@ void change_dir (char * str) {
 
 /*Clear terminal*/
 void clear () {
-  printf("\033[2J\033[1;1H");
+  printf("\033[2J\033[0;0H");
 }
 
 /*List contents of specified directory*/
@@ -56,7 +74,7 @@ void envir_vars () {
 
 /*Echo command*/
 void echo (int arg_count, char **str) {
-  for (int i = 0; i < arg_count; ++i)
+  for (int i = 1; i < arg_count; ++i)
     printf("%s ", str[i]);
   printf("\n");
 
@@ -85,7 +103,7 @@ void shell(char str[]) {
 
 /*Show manual*/
 void help () {
-  system("cat readme");
+  system("more readme");
 
 }
 
@@ -128,61 +146,52 @@ int main (int argc, char * argv[]) {
     str[strlen(str) - 1] = '\0';
 
     //Split string
-    int arg_count = 0, length = strlen(str);
-    char **arg, *command;
-    int redir_check = 0;
-    command = str;
-    for (int i = 0; i < length; ++i) {
-      if (str[i] == ' ' && redir_check == 0) {
-        str[i] = '\0';
-        arg[arg_count++] = str+i+1;
-      }
+    int arg_count = 0;
+    char **args;
+    char * token = strtok(str, " ");
 
-      //Stdin
-      else if (str[i] == '<') {
-        redir_check = 1;
-        str[i] = '\0';
-      }
+    char **stdout_list;
 
-      //Write to file
-      else if (str[i] == '>') {
-        //Append to file
-        str[i] = '\0';
-        redir_check = 1;
-        if (str[i+1] == '>') {
-          str[i+1] = '\0';
-        }
-        else {
-          
-        }
-      }
+    while (token != NULL) {
+      args[arg_count++] = token;
+      token = strtok (NULL, " ");
     }
+
+    for (int i = 0; i < arg_count; ++i) {
+      if (strcmp(args[i], "<") == 0 ||
+        strcmp(args[i], ">") == 0 ||
+        strcmp(args[i], ">>") == 0)
+        arg_count = i; 
+    }
+    // split(arg_count, args, token);
 
     /**
     ** Commands
     **/
+    char command[1024];
+    memcpy(command, args[0], 1024);
     //Change directory block
     if (strcmp(command, "cd") == 0)
-      change_dir(arg[0]);
+      change_dir(args[1]);
 
     //Clear block
     else if (strcmp(command, "clr") == 0)
       clear();
 
-    //Dir block
-    else if (strcmp(command, "dir") == 0 && redir_check == 0)
-      dir(arg[0]);
+    //Dir block - needs to support redirection
+    else if (strcmp(command, "dir") == 0)
+      dir(args[1]);
 
-    //Environ block
-    else if (strcmp(command, "environ") == 0 && redir_check == 0)
+    //Environ block - needs to support redirection
+    else if (strcmp(command, "environ") == 0)
       envir_vars();
 
-    //Echo block
-    else if (strcmp(command, "echo") == 0 && redir_check == 0)
-      echo(arg_count, arg);
+    //Echo block - needs to support redirection
+    else if (strcmp(command, "echo") == 0)
+      echo(arg_count, args);
 
-    //Help block
-    else if (strcmp(command, "help") == 0 && redir_check == 0)
+    //Help block - needs to support redirection
+    else if (strcmp(command, "help") == 0)
       help();
 
     //Pause block
@@ -191,11 +200,21 @@ int main (int argc, char * argv[]) {
 
     //Quit block
     else if (strcmp(command, "quit") == 0)
-      quit(); 
+      quit();
 
     //Shell script block
-    else if (strcmp(command, "myshell") == 0 && redir_check == 0)
-      shell(arg[0]);
+    else if (strcmp(command, "myshell") == 0)
+      shell(args[1]);
+
+    else if (feof(stdin)) {
+      printf("Goodbye!\n");
+      break;
+    }
+
+    else if (ferror(stdin)) {
+      printf("Oh noes!\n");
+      return 1;
+    }
 
     else {
       printf("Command not found: %s\n", command);
