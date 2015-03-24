@@ -176,44 +176,61 @@ int main (int argc, char * argv[]) {
 
 	while (1) {
 
-    //Get current directory - stored in global variable for use in dir
+    	//Get current directory - stored in global variable for use in dir
 		getcwd(cwd, sizeof(cwd));
 
-    // //Prints -user- in -directory-, colour coded with escape characters
-    // printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
-    //   RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
+    	// //Prints -user- in -directory-, colour coded with escape characters
+    	// printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
+    	//   RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
 		printf("%s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
 			RESET, GRN, cwd, RESET);  
 
-    //Read user input
+    	//Read user input
 		char str[1024];
 		fgets(str, 1024, stdin);
-    //Remove newline
+    	//Remove newline
 		str[strlen(str) - 1] = '\0';
 
-    //Split string
+    	//Split string
 		int arg_count = 0;
 		char **args;
-		char * token = strtok(str, " ");
 
-    //Store arguments in array of strings
+		char str_copy[1024];
+		strcpy(str_copy, str);
+		
+		//Count args
+		char * token_count = strtok(str_copy, " ");
+		while (token_count != NULL) {
+			arg_count++;
+			token_count = strtok (NULL, " ");
+		}
+
+		//Allocate memory for holding args
+		args = malloc(arg_count*sizeof(char*));
+		for (int i = 0; i < arg_count; ++i)
+			args[i] = malloc(1024);
+		arg_count = 0;
+
+    	//Store arguments in array of strings
+		char * token = strtok(str, " ");
 		while (token != NULL) {
 			args[arg_count++] = token;
 			token = strtok (NULL, " ");
 		}
 
-    //Count arguments up to redirection
+    	//Count arguments up to redirection
 		for (int i = 0; i < arg_count; ++i) {
 			if (strcmp(args[i], "<") == 0 || strcmp(args[i], ">") == 0 || strcmp(args[i], ">>") == 0)
 				arg_count = i; 
 		}
 
-    /**
-    ** Commands
-    **/
-    char command[1024];
-    memcpy(command, args[0], 1024);
-    parse_and_execute(arg_count, command, args); 
-}
-return 0;
+    	/**
+    	** Commands
+    	**/
+    	char command[1024];
+    	memcpy(command, args[0], 1024);
+    	parse_and_execute(arg_count, command, args);
+    	
+	}
+	return 0;
 }
