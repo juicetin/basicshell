@@ -5,7 +5,8 @@
 myshell: myshell.c
 	@clear
 	@echo Compiling myshell...
-	@clang myshell.c
-	@echo Starting myshell...
-	@echo Started!
-	@./a.out
+	@clang myshell.c -o myshell
+	@echo Compiled!
+
+run:
+	@./myshell

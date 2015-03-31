@@ -68,36 +68,36 @@ void echo (int arg_count, char **str) {
 }
 
 /*Run shell script*/
-void shell(char str[]) {
-
-	if (str == NULL) {
-		while (str == NULL) {
-			printf("Please enter a valid script or type exit to return to the shell.\n");
+void shell(char **args, FILE * input) {
+	char * str;
+	str = calloc(1024, 1);
+	printf("%s\n", args[1]);
+	if (args[1] == NULL)
+	{
+		while (*str == '\n' || *str == '\0')
+		{
+			printf("Please enter a valid script or type 'exit' to return to the shell.\n");
 			fgets(str, 1024, stdin);
-      //Remove newline
-			str[strlen(str) - 1] = '\0';
+
 			if (strcmp(str, "exit") == 0)
+			{
+				free(str);
 				return;
+			}
 		}
-		printf("derp\n");
 	}
-
-	FILE *script = fopen(str, "r");
-	
-
-  // char script[1024];
-  // strcpy(script, run_script);
-  // strcat(script, str);
-
-  //TODO - NO SYSTEM HERE LEL
-  // system(script);
+	free(str);
+	execlp("myshell", "myshell", input, NULL);
+	// execvp(args[0], args);
 }
 
 /*Show manual*/
 void help () {
-  //TODO - Exec this, NO SYSTEM!
-	system("more readme");
-
+	int pid = fork();
+	if (pid > 0)
+	{
+		execlp("more", "more", "readme");
+	}
 }
 
 /*Pause terminal*/
@@ -115,86 +115,46 @@ void quit () {
 	exit(0);
 }
 
-void parse_and_execute (int arg_count, char command[], char **args) {
-	if (strcmp(command, "cd") == 0)
-		change_dir(args[1]);
-
-    //Clear block
-	else if (strcmp(command, "clr") == 0)
-		clear();
-
-    //Dir block - needs to support redirection
-	else if (strcmp(command, "dir") == 0)
-		dir(args[1]);
-
-    //Environ block - needs to support redirection
-	else if (strcmp(command, "environ") == 0)
-		envir_vars();
-
-    //Echo block - needs to support redirection
-	else if (strcmp(command, "echo") == 0)
-		echo(arg_count, args);
-
-    //Help block - needs to support redirection
-	else if (strcmp(command, "help") == 0)
-		help();
-
-    //Pause block
-	else if (strcmp(command, "pause") == 0)
-		shell_pause();
-
-    //Quit block
-	else if (strcmp(command, "quit") == 0)
-		quit();
-
-    //Shell script block
-	else if (strcmp(command, "myshell") == 0)
-		shell(args[1]);
-
-	else if (feof(stdin)) {
-		printf("Goodbye!\n");
-		return;
-	}
-
-	else if (ferror(stdin)) {
-		printf("Oh noes!\n");
-		return;
-	}
-
-	else {
-		printf("Command not found: %s\n", command);
-	}
-
-	printf("\n");
-}
-
 int main (int argc, char * argv[]) {
-
-  // // Get domain - seems to cause crashes when executing certain commands...
-  // char domain_name[1024];
-  // gethostname(domain_name, 1024);
-
 	while (1) {
 
     	//Get current directory - stored in global variable for use in dir
 		getcwd(cwd, sizeof(cwd));
 
     	// //Prints -user- in -directory-, colour coded with escape characters
-    	// printf("%s%s at %s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
-    	//   RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
-		printf("%s%s %sin %s%s\n%s$ ", MAGENTA, getenv("USER"), 
-			RESET, GRN, cwd, RESET);  
-
-    	//Read user input
+		char domain_name[1024];
+		gethostname(domain_name, 1024);
+		printf("%s%s %sat %s%s %sin %s%s\n%s> ", MAGENTA, getenv("USER"), 
+    	  RESET, RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
+		
+		FILE * input;
+		if (argv[1] != NULL)
+		{
+			FILE * script;
+			script = fopen(argv[1], "r+");
+			input = script;
+		}
+		else
+		{
+			input = stdin;
+		}
+		
+    	//Read user input and remove newline character
 		char str[1024];
-		fgets(str, 1024, stdin);
-    	//Remove newline
+		fgets(str, 1024, input);
+
+		//Do nothing if no command entered
+		if (*str == '\n')
+		{
+			printf("\n");
+			continue;
+		}
+
 		str[strlen(str) - 1] = '\0';
 
     	//Split string
 		int arg_count = 0;
 		char **args;
-
 		char str_copy[1024];
 		strcpy(str_copy, str);
 		
@@ -229,8 +189,58 @@ int main (int argc, char * argv[]) {
     	**/
     	char command[1024];
     	memcpy(command, args[0], 1024);
-    	parse_and_execute(arg_count, command, args);
+
+    	if (strcmp(command, "cd") == 0)
+    		change_dir(args[1]);
+
+    	//Clear block
+    	else if (strcmp(command, "clr") == 0)
+    		clear();
+
+    	//Dir block - needs to support redirection
+    	else if (strcmp(command, "dir") == 0)
+    		dir(args[1]);
+
+    	//Environ block - needs to support redirection
+    	else if (strcmp(command, "environ") == 0)
+    		envir_vars();
+
+    	//Echo block - needs to support redirection
+    	else if (strcmp(command, "echo") == 0)
+    		echo(arg_count, args);
+
+    	//Help block - needs to support redirection
+    	else if (strcmp(command, "help") == 0)
+    		help();
+
+    	//Pause block
+    	else if (strcmp(command, "pause") == 0)
+    		shell_pause();
+
+    	//Quit block
+    	else if (strcmp(command, "quit") == 0)
+    		quit();
+
+    	//Shell script block
+    	else if (strcmp(command, "myshell") == 0)
+    		shell(args, input);
+
+    	else if (feof(stdin)) {
+    		printf("Goodbye!\n");
+    		exit(0);
+    	}
+
+    	else if (ferror(stdin)) {
+    		printf("Oh noes!\n");
+    		exit(0);
+    	}
+
+    	else {
+    		printf("Command not found: %s\n", command);
+    	}
+
+    	printf("\n");
     	
-	}
-	return 0;
+    }
+    return 0;
 }
