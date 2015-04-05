@@ -130,28 +130,25 @@ void parse (int * arg_count, char *** args, char *str_copy, char *str)
 {
 	char * token_count = strtok(str_copy, " ");
 	while (token_count != NULL) {
-		*arg_count++;
+		(*arg_count)++;
 		token_count = strtok (NULL, " ");
 	}
 
-		//Allocate memory for holding args
+	//Allocate memory for holding args
 	(*args) = calloc(*arg_count, sizeof(char**));
 	for (int i = 0; i < *arg_count; ++i)
 		(*args)[i] = calloc(1024, sizeof(char*));
-	// *arg_count = 0;
+	(*arg_count) = 0;
+}
 
- //    	//Store arguments in array of strings
-	// char * token = strtok(str, " ");
-	// while (token != NULL) {
-	// 	*args[*arg_count++] = token;
-	// 	token = strtok (NULL, " ");
-	// }
-
- //    	//Count arguments up to redirection
-	// for (int i = 0; i < *arg_count; ++i) {
-	// 	if (strcmp(*args[i], "<") == 0 || strcmp(*args[i], ">") == 0 || strcmp(*args[i], ">>") == 0)
-	// 		*arg_count = i; 
-	// }
+void store_args (int * arg_count, char * str, char *** args)
+{
+	// Store arguments in array of strings
+	char * token = strtok(str, " ");
+	while (token != NULL) {
+		strcpy((*args)[(*arg_count)++], token);
+		token = strtok (NULL, " ");
+	}
 }
 
 void execute (int arg_count, char * command, char ** args)
@@ -242,7 +239,7 @@ int main (int argc, char * argv[]) {
 			printf("\n");
 			continue;
 		}
-
+		
 		str[strlen(str) - 1] = '\0';
 
     	//Split string
@@ -250,27 +247,31 @@ int main (int argc, char * argv[]) {
 		char **args;
 		char str_copy[1024];
 		strcpy(str_copy, str);
-		// parse(&arg_count, &args, str_copy, str);
-		// Count args
-		char * token_count = strtok(str_copy, " ");
-		
-		while (token_count != NULL) {
-			arg_count++;
-			token_count = strtok (NULL, " ");
-		}
+		parse(&arg_count, &args, str_copy, str);
 
-		//Allocate memory for holding args
-		args = malloc(arg_count*sizeof(char*));
-		for (int i = 0; i < arg_count; ++i)
-			args[i] = malloc(1024);
-		arg_count = 0;
-// 
-    	Store arguments in array of strings
-		char * token = strtok(str, " ");
-		while (token != NULL) {
-			strcpy(args[arg_count++], token);
-			token = strtok (NULL, " ");
-		}
+		// strcpy(args[2], "bar");
+		// printf("%s\n", args[2]);
+		
+		// // Count args
+		// char * token_count = strtok(str_copy, " ");
+		// while (token_count != NULL) {
+		// 	arg_count++;
+		// 	token_count = strtok (NULL, " ");
+		// }
+
+		// //Allocate memory for holding args
+		// args = malloc(arg_count*sizeof(char*));
+		// for (int i = 0; i < arg_count; ++i)
+		// 	args[i] = malloc(1024);
+		// arg_count = 0;
+
+    	// Store arguments in array of strings
+		store_args (&arg_count, str, &args);
+		// char * token = strtok(str, " ");
+		// while (token != NULL) {
+		// 	strcpy(args[arg_count++], token);
+		// 	token = strtok (NULL, " ");
+		// }
 
     	//Count arguments up to redirection
 		for (int i = 0; i < arg_count; ++i) {
