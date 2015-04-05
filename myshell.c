@@ -251,18 +251,18 @@ int main (int argc, char * argv[]) {
 		char str_copy[1024];
 		strcpy(str_copy, str);
 		parse(&arg_count, &args, str_copy, str);
-		// // Count args
-		// char * token_count = strtok(str_copy, " ");
+		// Count args
+		char * token_count = strtok(str_copy, " ");
 		
-		// while (token_count != NULL) {
-		// 	arg_count++;
-		// 	token_count = strtok (NULL, " ");
-		// }
+		while (token_count != NULL) {
+			arg_count++;
+			token_count = strtok (NULL, " ");
+		}
 
-		// //Allocate memory for holding args
-		// args = malloc(arg_count*sizeof(char*));
-		// for (int i = 0; i < arg_count; ++i)
-		// 	args[i] = malloc(1024);
+		//Allocate memory for holding args
+		args = malloc(arg_count*sizeof(char*));
+		for (int i = 0; i < arg_count; ++i)
+			args[i] = malloc(1024);
 		arg_count = 0;
 
     	//Store arguments in array of strings
