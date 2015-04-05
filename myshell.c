@@ -9,7 +9,6 @@
 #define MAGENTA "\x1b[35m"
 #define RED "\x1b[31m"
 
-static const char run_script[] = "./";
 extern char **environ;
 char cwd[1024];
 
@@ -126,8 +125,10 @@ void quit () {
 // char **args;
 // char str_copy[1024];
 // strcpy(str_copy, str);
-void parse (int * arg_count, char *** args, char *str_copy, char *str)
+void parse (int * arg_count, char *** args, char *str)
 {
+	char str_copy[1024];
+	strcpy(str_copy, str);
 	char * token_count = strtok(str_copy, " ");
 	while (token_count != NULL) {
 		(*arg_count)++;
@@ -149,10 +150,19 @@ void store_args (int * arg_count, char * str, char *** args)
 		strcpy((*args)[(*arg_count)++], token);
 		token = strtok (NULL, " ");
 	}
+
+	    	//Count arguments up to redirection
+	for (int i = 0; i < *arg_count; ++i) {
+		if (strcmp((*args)[i], "<") == 0 || strcmp((*args)[i], ">") == 0 || strcmp((*args)[i], ">>") == 0)
+			*arg_count = i; 
+	}
 }
 
-void execute (int arg_count, char * command, char ** args)
+void execute_commands(int arg_count, char ** args)
 {
+	char command[1024];
+	memcpy(command, args[0], 1024);
+
 	if (strcmp(command, "cd") == 0)
 		change_dir(args[1]);
 
@@ -205,28 +215,31 @@ void execute (int arg_count, char * command, char ** args)
 	printf("\n");
 }
 
+void print_prompt_line ()
+{
+	//Get current directory - stored in global variable for use in dir
+	getcwd(cwd, sizeof(cwd));
+
+    //Prints -user- in -directory-, colour coded with escape characters
+	char domain_name[1024];
+	gethostname(domain_name, 1024);
+	printf("%s%s %sat %s%s %sin %s%s\n%s> ", MAGENTA, getenv("USER"), 
+    	  RESET, RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
+}
+
+void free_args(int *arg_count, char ***args)
+{
+	for (int i = 0; i < *arg_count; ++i)
+		free((*args)[i]);
+	free(*args);
+}
+
 int main (int argc, char * argv[]) {
 	while (1) {
-    	//Get current directory - stored in global variable for use in dir
-		getcwd(cwd, sizeof(cwd));
 
-    	// //Prints -user- in -directory-, colour coded with escape characters
-		char domain_name[1024];
-		gethostname(domain_name, 1024);
-		printf("%s%s %sat %s%s %sin %s%s\n%s> ", MAGENTA, getenv("USER"), 
-    	  RESET, RED, domain_name, RESET, GRN, cwd, RESET); // Also has domain host name
+		print_prompt_line();
 
 		FILE * input;
-		// if (argv[1] != NULL)
-		// {
-		// 	FILE * file;
-		// 	file = fopen(argv[1], "r");
-		// 	// printf("%s\n", argv[1]);
-		// 	// while(fgets())
-		// }
-		// else {
-		// 	input = stdin;
-		// }
 		input = stdin;
 
     	//Read user input and remove newline character
@@ -239,56 +252,18 @@ int main (int argc, char * argv[]) {
 			printf("\n");
 			continue;
 		}
-		
+
+		//Remove newline character
 		str[strlen(str) - 1] = '\0';
 
-    	//Split string
+    	//Split string and store arguments
 		int arg_count = 0;
-		char **args;
-		char str_copy[1024];
-		strcpy(str_copy, str);
-		parse(&arg_count, &args, str_copy, str);
-
-		// strcpy(args[2], "bar");
-		// printf("%s\n", args[2]);
-		
-		// // Count args
-		// char * token_count = strtok(str_copy, " ");
-		// while (token_count != NULL) {
-		// 	arg_count++;
-		// 	token_count = strtok (NULL, " ");
-		// }
-
-		// //Allocate memory for holding args
-		// args = malloc(arg_count*sizeof(char*));
-		// for (int i = 0; i < arg_count; ++i)
-		// 	args[i] = malloc(1024);
-		// arg_count = 0;
-
-    	// Store arguments in array of strings
+		char **args;	
+		parse(&arg_count, &args, str);
 		store_args (&arg_count, str, &args);
-		// char * token = strtok(str, " ");
-		// while (token != NULL) {
-		// 	strcpy(args[arg_count++], token);
-		// 	token = strtok (NULL, " ");
-		// }
+		execute_commands(arg_count, args);
 
-    	//Count arguments up to redirection
-		for (int i = 0; i < arg_count; ++i) {
-			if (strcmp(args[i], "<") == 0 || strcmp(args[i], ">") == 0 || strcmp(args[i], ">>") == 0)
-				arg_count = i; 
-		}
-
-    	/**
-    	** Commands
-    	**/
-    	char command[1024];
-    	memcpy(command, args[0], 1024);
-    	execute (arg_count, command, args);
-
-    	for (int i = 0; i < arg_count; ++i)
-    		free(args[i]);
-    	free(args);
-    }
-    return 0;
+		free_args(&arg_count, &args);
+	}
+	return 0;
 }
