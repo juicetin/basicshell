@@ -250,7 +250,7 @@ int main (int argc, char * argv[]) {
 		char **args;
 		char str_copy[1024];
 		strcpy(str_copy, str);
-		parse(&arg_count, &args, str_copy, str);
+		// parse(&arg_count, &args, str_copy, str);
 		// Count args
 		char * token_count = strtok(str_copy, " ");
 		
@@ -264,8 +264,8 @@ int main (int argc, char * argv[]) {
 		for (int i = 0; i < arg_count; ++i)
 			args[i] = malloc(1024);
 		arg_count = 0;
-
-    	//Store arguments in array of strings
+// 
+    	Store arguments in array of strings
 		char * token = strtok(str, " ");
 		while (token != NULL) {
 			strcpy(args[arg_count++], token);
