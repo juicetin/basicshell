@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <string.h>
+#include "commands.h"
 
 #define GRN  "\x1B[32m"
 #define RESET "\033[0m"
@@ -14,6 +10,7 @@ char cwd[1024];
 
 /*Change directory*/
 void change_dir (char * str) {
+	
 	if (str == NULL)
 		printf("No directory entered. Current directory is: %s\n", cwd);
 	else if (chdir(str) != 0)
@@ -71,7 +68,6 @@ void echo (int arg_count, char **str)
 /*Run shell script*/
 void shell(char **args)
 {
-	printf("started self\n");
 	if (args[1] == NULL)
 	{
 		char * str;
@@ -88,11 +84,11 @@ void shell(char **args)
 			}
 		}
 		str[strlen(str)-1] = '\0';
+		execlp("myshell", "myshell", str, NULL);
+		strcpy(args[1], str);
 		free(str);
 	}
-	printf("%s\n", args[1]);
-	// execlp("myshell", "myshell", args[1], NULL);
-	execvp(args[0], args);
+	execlp("./myshell", "./myshell", args[1], NULL);
 }
 
 /*Show manual*/
@@ -117,15 +113,12 @@ void shell_pause ()
 }
 
 /*Quit terminal*/
-void quit () {
+void quit ()
+{
 	exit(0);
 }
 
-// int arg_count = 0;
-// char **args;
-// char str_copy[1024];
-// strcpy(str_copy, str);
-void parse (int * arg_count, char *** args, char *str)
+void parse_input (int * arg_count, char *** args, char *str)
 {
 	char str_copy[1024];
 	strcpy(str_copy, str);
@@ -158,7 +151,7 @@ void store_args (int * arg_count, char * str, char *** args)
 	}
 }
 
-void execute_commands(int arg_count, char ** args)
+void execute_commands (int arg_count, char ** args)
 {
 	char command[1024];
 	memcpy(command, args[0], 1024);
@@ -212,7 +205,7 @@ void execute_commands(int arg_count, char ** args)
 		printf("Command not found: %s\n", command);
 	}
 
-	printf("\n");
+	// printf("\n");
 }
 
 void print_prompt_line ()
@@ -232,38 +225,4 @@ void free_args(int *arg_count, char ***args)
 	for (int i = 0; i < *arg_count; ++i)
 		free((*args)[i]);
 	free(*args);
-}
-
-int main (int argc, char * argv[]) {
-	while (1) {
-
-		print_prompt_line();
-
-		FILE * input;
-		input = stdin;
-
-    	//Read user input and remove newline character
-		char str[1024];
-		fgets(str, 1024, input);
-
-		//Do nothing if no command entered
-		if (*str == '\n')
-		{
-			printf("\n");
-			continue;
-		}
-
-		//Remove newline character
-		str[strlen(str) - 1] = '\0';
-
-    	//Split string and store arguments
-		int arg_count = 0;
-		char **args;	
-		parse(&arg_count, &args, str);
-		store_args (&arg_count, str, &args);
-		execute_commands(arg_count, args);
-
-		free_args(&arg_count, &args);
-	}
-	return 0;
 }
