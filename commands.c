@@ -146,7 +146,6 @@ void external_command (int arg_count, char **args)
 			{
 				args[i] = NULL;
 				freopen(args[i+1], "w+", stdout);
-				close(0);
 				stdout_chk = 1;
 			}
 
@@ -190,12 +189,6 @@ void store_args (int * arg_count, char * str, char *** args)
 		strcpy((*args)[(*arg_count)++], token);
 		token = strtok (NULL, " ");
 	}
-
-	// //Count arguments up to redirection
-	// for (int i = 0; i < *arg_count; ++i) {
-	// 	if (strcmp((*args)[i], "<") == 0 || strcmp((*args)[i], ">") == 0 || strcmp((*args)[i], ">>") == 0)
-	// 		*arg_count = i; 
-	// }
 }
 
 void execute_commands (int arg_count, char ** args)
