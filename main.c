@@ -1,3 +1,6 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #include "commands.h"
 
 int main (int argc, char * argv[]) {
@@ -27,11 +30,7 @@ int main (int argc, char * argv[]) {
 		{
 
 			//Do nothing if no command entered
-			if (*str == '\n')
-			{
-				printf("\n");
-				break;
-			}
+			if (*str == '\n') break;
 
 			//Remove newline character
 			str[strlen(str) - 1] = '\0';

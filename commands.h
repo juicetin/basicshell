@@ -1,8 +1,12 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #ifndef COMMAND_H
 #define COMMAND_H
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>

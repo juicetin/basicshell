@@ -1,3 +1,6 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #include "commands.h"
 
 #define GRN  "\x1B[32m"
@@ -95,9 +98,13 @@ void shell(char **args)
 void help ()
 {
 	int pid = fork();
-	if (pid > 0)
+	if (pid == 0)
 	{
-		execlp("more", "more", "readme");
+		execlp("more", "more", "readme", NULL);
+	}
+	else
+	{
+		waitpid(pid, NULL, 0);
 	}
 }
 
@@ -116,6 +123,55 @@ void shell_pause ()
 void quit ()
 {
 	exit(0);
+}
+
+void external_command (int arg_count, char **args)
+{
+	//freopen("file", "r", stdin);
+	int stdin_chk = 0, stdout_chk = 0;
+	for (int i = 0; i < arg_count; ++i)
+	{
+		// if ((strcmp(args[i], "<") == 0 ||
+		// 	strcmp(args[i], ">") == 0 ||
+		// 	strcmp(args[i], ">>") == 0) &&
+		// 	(stdin_chk == 0 && stdout_chk == 0))
+		// {
+		// 	args[i+1] = NULL;
+		// }
+
+		if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
+		{
+			args[i] = NULL;
+			stdin_chk = 1;
+		}
+
+		else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
+		{
+			args[i] = NULL;
+			stdout_chk = 1;
+		}
+
+		else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
+		{
+			args[i] = NULL;
+			stdout_chk = 1;
+		}
+		else if (stdout_chk == 1 && stdin_chk == 1)
+		{
+			break;
+		}
+	}
+
+	int pid = fork();
+	if (pid == 0)
+	{
+		// execlp(args[0], args[0], NULL);
+		execvp(args[0], args);
+	}
+	else
+	{
+		waitpid(pid, NULL, 0);
+	}
 }
 
 void parse_input (int * arg_count, char *** args, char *str)
@@ -144,11 +200,11 @@ void store_args (int * arg_count, char * str, char *** args)
 		token = strtok (NULL, " ");
 	}
 
-	    	//Count arguments up to redirection
-	for (int i = 0; i < *arg_count; ++i) {
-		if (strcmp((*args)[i], "<") == 0 || strcmp((*args)[i], ">") == 0 || strcmp((*args)[i], ">>") == 0)
-			*arg_count = i; 
-	}
+	// //Count arguments up to redirection
+	// for (int i = 0; i < *arg_count; ++i) {
+	// 	if (strcmp((*args)[i], "<") == 0 || strcmp((*args)[i], ">") == 0 || strcmp((*args)[i], ">>") == 0)
+	// 		*arg_count = i; 
+	// }
 }
 
 void execute_commands (int arg_count, char ** args)
@@ -202,10 +258,8 @@ void execute_commands (int arg_count, char ** args)
 	}
 
 	else {
-		printf("Command not found: %s\n", command);
+		external_command (arg_count, args);
 	}
-
-	// printf("\n");
 }
 
 void print_prompt_line ()

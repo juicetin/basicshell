@@ -1,3 +1,6 @@
 sample.sh
 .myshell.c.swp
 a.out
+*.o
+z
+myshell
