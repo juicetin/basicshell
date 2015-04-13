@@ -128,44 +128,35 @@ void quit ()
 void external_command (int arg_count, char **args)
 {
 	//freopen("file", "r", stdin);
-	int stdin_chk = 0, stdout_chk = 0;
-	for (int i = 0; i < arg_count; ++i)
-	{
-		// if ((strcmp(args[i], "<") == 0 ||
-		// 	strcmp(args[i], ">") == 0 ||
-		// 	strcmp(args[i], ">>") == 0) &&
-		// 	(stdin_chk == 0 && stdout_chk == 0))
-		// {
-		// 	args[i+1] = NULL;
-		// }
-
-		if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
-		{
-			args[i] = NULL;
-			stdin_chk = 1;
-		}
-
-		else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
-		{
-			args[i] = NULL;
-			stdout_chk = 1;
-		}
-
-		else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
-		{
-			args[i] = NULL;
-			stdout_chk = 1;
-		}
-		else if (stdout_chk == 1 && stdin_chk == 1)
-		{
-			break;
-		}
-	}
 
 	int pid = fork();
 	if (pid == 0)
 	{
-		// execlp(args[0], args[0], NULL);
+		int stdin_chk = 0, stdout_chk = 0;
+		for (int i = 0; i < arg_count; ++i)
+		{
+			if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
+			{
+				args[i] = NULL;
+				freopen(args[i+1], "r", stdin);
+				stdin_chk = 1;
+			}
+
+			else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
+			{
+				args[i] = NULL;
+				freopen(args[i+1], "w+", stdout);
+				close(0);
+				stdout_chk = 1;
+			}
+
+			else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
+			{
+				args[i] = NULL;
+				freopen(args[i+1], "a+", stdout);
+				stdout_chk = 1;
+			}
+		}
 		execvp(args[0], args);
 	}
 	else
