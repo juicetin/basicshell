@@ -186,7 +186,7 @@ void shell(char **args)
 }
 
 /*Show manual*/
-void help ()
+void help (char **args)
 {
 	int pid = fork();
 	if (pid == 0)
@@ -335,7 +335,7 @@ void execute_commands (int arg_count, char ** args)
 
     	//Help block - needs to support redirection
 	else if (strcmp(command, "help") == 0)
-		help();
+		help(args);
 
     	//Pause block
 	else if (strcmp(command, "pause") == 0)

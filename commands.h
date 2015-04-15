@@ -17,7 +17,7 @@ void dir (char **args);
 void envir_vars ();
 void echo (int arg_count, char **args);
 void shell(char **args);
-void help ();
+void help (char **args);
 void shell_pause ();
 void quit ();
 void parse_input (int * arg_count, char *** args, char *str);
