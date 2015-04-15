@@ -40,7 +40,7 @@ void dir (char **args)
 		{
 			char paths[1024];
 			FILE *fp = popen("ls -al", "r");
-			
+
 			//Truncate file with output
 			if (strcmp(args[2], ">") == 0)
 			{
@@ -80,7 +80,7 @@ void envir_vars (char **args)
 		//Truncate file with env variables
 		if (strcmp(args[1], ">") == 0)
 		{
-			FILE *fp = fopen(args[2], "r+");
+			FILE *fp = fopen(args[2], "w+");
 			while (environ[i])
 				fprintf(fp, "%s\n", environ[i++]);
 			fclose(fp);
@@ -191,7 +191,32 @@ void help ()
 	int pid = fork();
 	if (pid == 0)
 	{
-		execlp("more", "more", "readme", NULL);
+		if (args[2] != NULL)
+		{
+			char paths[1024];
+			FILE *fp = popen("more readme", "r");
+
+			//Truncate file with output
+			if (strcmp(args[1], ">") == 0)
+			{
+				FILE *output = fopen(args[2], "w+");
+				while (fgets(paths, 1024, fp) != NULL)
+					fprintf(output, "%s", paths);
+				fclose(output);
+			}
+
+			//Append output to file
+			else if (strcmp(args[1], ">>") == 0)
+			{
+				FILE *output = fopen(args[2], "a+");
+				while (fgets(paths, 1024, fp) != NULL)
+					fprintf(output, "%s", paths);
+				fclose(output);
+			}
+			pclose(fp);
+		}
+		else
+			execlp("more", "more", "readme", NULL);
 	}
 	else
 	{
