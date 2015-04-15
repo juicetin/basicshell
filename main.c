@@ -4,7 +4,6 @@
 #include "helpers.h"
 #include "internal_commands.h"
 #include "external_commands.h"
-#include "execute.h"
 
 int main (int argc, char * argv[]) {
 	set_shell_path_envvar();
