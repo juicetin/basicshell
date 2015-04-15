@@ -1,3 +1,6 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #ifndef HELPERS_H
 #define HELPERS_H
 

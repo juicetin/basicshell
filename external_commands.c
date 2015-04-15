@@ -1,3 +1,6 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #include "external_commands.h"
 
 void external_command (int arg_count, char **args)
@@ -13,6 +16,7 @@ void external_command (int arg_count, char **args)
 		int stdin_chk = 0, stdout_chk = 0;
 		for (int i = 0; i < arg_count; ++i)
 		{
+			//Take stdin
 			if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
 			{
 				args[i] = NULL;
@@ -20,6 +24,7 @@ void external_command (int arg_count, char **args)
 				stdin_chk = 1;
 			}
 
+			//Truncate file
 			else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
 			{
 				args[i] = NULL;
@@ -27,6 +32,7 @@ void external_command (int arg_count, char **args)
 				stdout_chk = 1;
 			}
 
+			//Append to file
 			else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
 			{
 				args[i] = NULL;
@@ -35,7 +41,9 @@ void external_command (int arg_count, char **args)
 			}
 		}
 		execvp(args[0], args);
-		printf("myshell: command not found: %s\n", args[0]);
+
+		//Print error if execvp fails
+		fprintf(stderr, "myshell: command not found: %s\n", args[0]);
 	}
 	else
 	{
@@ -61,7 +69,7 @@ void shell(char **args)
 		str = calloc(1024, 1);
 		while (*str == '\n' || *str == '\0')
 		{
-			printf("Please enter a valid script or type 'exit' to return to the shell.\n");
+			fprintf(stderr, "Please enter a valid script or type 'exit' to return to the shell.\n");
 			fgets(str, 1024, stdin);
 
 			if (strcmp(str, "exit") == 0)

@@ -10,7 +10,7 @@ void change_dir (char * str) {
 	if (str == NULL)
 		printf("No directory entered. Current directory is: %s\n", cwd);
 	else if (chdir(str) != 0)
-		printf("Directory does not exist. Please enter a valid directory.\n");
+		fprintf(stderr, "Directory does not exist. Please enter a valid directory.\n");
 	else {
 		//Change PWD environment variable
 		getcwd(cwd, sizeof(cwd));

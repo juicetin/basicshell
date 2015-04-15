@@ -1,3 +1,6 @@
+// Justin Ting, 430203826 - Operating Systems Internals Assignment 1
+// Monday 10am-12pm lab - Tutor: Jeshua
+
 #include "helpers.h"
 
 void parse_input (int * arg_count, char *** args, char *str)
@@ -81,7 +84,7 @@ void execute_commands (int arg_count, char ** args)
 	}
 
 	else if (ferror(stdin)) {
-		printf("Oh noes!\n");
+		fprintf(stderr, "Oh noes!\n");
 		exit(0);
 	}
 
