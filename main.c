@@ -1,21 +1,20 @@
 // Justin Ting, 430203826 - Operating Systems Internals Assignment 1
 // Monday 10am-12pm lab - Tutor: Jeshua
 
-#include "commands.h"
+#include "helpers.h"
+#include "internal_commands.h"
+#include "external_commands.h"
+#include "execute.h"
 
 int main (int argc, char * argv[]) {
-	
-	//Prevent infinite execution of the same script,
-	//i.e. until "too many directories" are open
-	
+	set_shell_path_envvar();
 	while (1) {
 
-		//Print username, domain location, 
-		//and current directory with user prompt
+		//Print username, domain,and current
+		// directory with user prompt
 		print_prompt_line();
 
-		FILE * input = NULL;
-		input = fopen(argv[1], "r");
+		FILE * input = fopen(argv[1], "r");
 		int command_check = 0;
 		
 		if (input == NULL)
@@ -28,12 +27,8 @@ int main (int argc, char * argv[]) {
 		char str[1024];
 		while (fgets(str, 1024, input) != NULL)
 		{
-
-			//Do nothing if no command entered
-			if (*str == '\n') break;
-
-			//Remove newline character
-			str[strlen(str) - 1] = '\0';
+			if (*str == '\n') break; //Do nothing on empty input
+			str[strlen(str) - 1] = '\0'; //Remove newline
 
     		//Split string and store arguments
 			int arg_count = 0;
@@ -42,12 +37,9 @@ int main (int argc, char * argv[]) {
 			store_args(&arg_count, str, &args);
 			execute_commands(arg_count, args);
 
-			//Free allocated memory
 			free_args(&arg_count, &args);
 
-			//Prompt user command if only a command
-			//(non-file) was entered
-			if (command_check == 1)	break;
+			if (command_check == 1)	break; //Escape if not reading script
 		}
 		printf("\n");
 		if (command_check == 0) exit(0);
