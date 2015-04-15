@@ -5,17 +5,19 @@
 #include "internal_commands.h"
 #include "external_commands.h"
 
+n_children = 1;
+
 int main (int argc, char * argv[]) {
 	set_shell_path_envvar();
-	while (1) {
+	for (;;) {
 
-		//Print username, domain,and current
-		// directory with user prompt
+		//Prints user, domain, current directory
 		print_prompt_line();
 
 		FILE * input = fopen(argv[1], "r");
-		int command_check = 0;
 		
+		//Account for file vs. argument
+		int command_check = 0;
 		if (input == NULL)
 		{
 			command_check = 1;

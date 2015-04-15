@@ -39,11 +39,20 @@ void external_command (int arg_count, char **args)
 	}
 	else
 	{
-		waitpid(pid, NULL, 0);
+		//Run in background
+		if (strcmp(args[arg_count-1], "&") == 0)
+		{
+			printf("[%d] %d\n", n_children++, pid);
+		}
+		//Wait for child to finish
+		else
+		{
+			waitpid(pid, NULL, 0);
+		}
 	}
 }
 
-/*Run shell script*/
+/*Run script using myshell*/
 void shell(char **args)
 {
 	if (args[1] == NULL)

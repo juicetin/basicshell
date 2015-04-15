@@ -7,6 +7,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
+int n_children;
+
 void external_command (int arg_count, char **args);
 void shell(char **args);
 

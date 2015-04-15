@@ -4,11 +4,7 @@
 
 myshell: main.c internal_commands.c internal_commands.h external_commands.c external_commands.h helpers.c helpers.h
 	@echo Compiling myshell...
-	@clang -c internal_commands.c -o internal_commands.o
-	@clang -c external_commands.c -o external_commands.o
-	@clang -c helpers.c -o helpers.o
-	@clang -c main.c -o main.o
-	@clang internal_commands.o external_commands.o helpers.o main.o -o myshell
+	@clang -Wall internal_commands.c external_commands.c helpers.c main.c -o myshell
 	@echo Compiled!
 
 clean:
