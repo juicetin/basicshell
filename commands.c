@@ -1,7 +1,7 @@
 // Justin Ting, 430203826 - Operating Systems Internals Assignment 1
 // Monday 10am-12pm lab - Tutor: Jeshua
 
-#include "internal_commands.h"
+#include "commands.h"
 
 /////////////////////////////////////////
 /////////// INTERNAL COMMANDS ///////////

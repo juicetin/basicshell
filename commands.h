@@ -1,8 +1,8 @@
 // Justin Ting, 430203826 - Operating Systems Internals Assignment 1
 // Monday 10am-12pm lab - Tutor: Jeshua
 
-#ifndef INTERNAL_COMMANDS_H
-#define INTERNAL_COMMANDS_H
+#ifndef COMMANDS_H
+#define COMMANDS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,4 +30,4 @@ void quit ();							//viii
 void external_command (int arg_count, char **args);
 void shell(char **args);
 
-#endif // INTERNAL_COMMANDS_H
+#endif // COMMANDS_H
