@@ -2,8 +2,7 @@
 // Monday 10am-12pm lab - Tutor: Jeshua
 
 #include "helpers.h"
-#include "internal_commands.h"
-#include "external_commands.h"
+#include "commands.h"
 
 n_children = 1;
 

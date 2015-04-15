@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "internal_commands.h"
-#include "external_commands.h"
 
 #define GRN  "\x1B[32m"
 #define RESET "\033[0m"
