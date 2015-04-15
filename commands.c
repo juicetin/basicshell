@@ -10,6 +10,7 @@
 
 extern char **environ;
 char cwd[1024];
+struct termios saved_attributes;
 
 /*Change directory*/
 void change_dir (char * str) {
@@ -225,14 +226,71 @@ void help (char **args)
 }
 
 /*Pause terminal*/
-//Naming to avoid conflict with stdlib.h library
-void shell_pause ()
-{
-	for(;;) {
-		char c = getchar();
-		if (c == '\n')
-			break;
+void reset_input_mode (void) {
+	tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
+}
+
+void set_input_mode (void) {
+	struct termios tattr;
+
+	/* Make sure stdin is a terminal. */
+	if (!isatty (STDIN_FILENO)) {
+		fprintf (stderr, "Not a terminal.\n");
+		exit (EXIT_FAILURE);
 	}
+
+	/* Save the terminal attributes so we can restore them later. */
+	tcgetattr (STDIN_FILENO, &saved_attributes);
+	atexit (reset_input_mode);
+
+	/* Set the funny terminal modes. */
+	tcgetattr (STDIN_FILENO, &tattr);
+	tattr.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
+	tattr.c_cc[VMIN] = 1;
+	tattr.c_cc[VTIME] = 0;
+	tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
+}
+
+//Naming to avoid conflict with stdlib.h library
+int shell_pause ()
+{
+	char c;
+	FILE * null_file = NULL;
+
+	set_input_mode ();
+
+	null_file = fopen("/dev/null", "w");
+
+	/* INSERT THE TWO MISSING LINES HERE! */
+	/* Hint: One of these two lines is a call to fflush() */
+	printf("Press enter to continue...\n");
+	fflush(stdin);
+
+	while (1)
+	{
+		read (STDIN_FILENO, &c, 1);
+		if (c == '\004')
+		{ 
+			/* Catch control-d */
+			break;
+		}
+		else if (c == '\n')
+		{ 
+			/* Catch Enter */
+			break;
+		}
+		else
+		{
+			fprintf (null_file, "%c", c); /* Discard other input */
+			fflush (null_file);
+		}
+	}
+	if (null_file != NULL)
+	{
+		fclose (null_file);
+	}
+	reset_input_mode();
+	return EXIT_SUCCESS;
 }
 
 /*Quit terminal*/

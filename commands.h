@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>
+#include <termios.h>
 
 void change_dir (char * str);
 void clear ();
@@ -18,7 +19,7 @@ void envir_vars ();
 void echo (int arg_count, char **args);
 void shell(char **args);
 void help (char **args);
-void shell_pause ();
+int shell_pause ();
 void quit ();
 void parse_input (int * arg_count, char *** args, char *str);
 void store_args (int * arg_count, char * str, char *** args);
