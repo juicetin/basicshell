@@ -31,41 +31,132 @@ void clear () {
 }
 
 /*List contents of specified directory*/
-void dir (char *str)
+void dir (char **args)
 {
+	int pid = fork();
+	if (pid == 0)
+	{
+		if (args[2] != NULL)
+		{
+			char paths[1024];
+			FILE *fp = popen("ls -al", "r");
+			
+			//Truncate file with output
+			if (strcmp(args[2], ">") == 0)
+			{
+				FILE *output = fopen(args[3], "w+");
+				while (fgets(paths, 1024, fp) != NULL)
+					fprintf(output, "%s", paths);
+				fclose(output);
+				// pclose(fp);
+			}
 
-	DIR *dp;
-	struct dirent *ep;
-
-	if (str == NULL)
-		printf("Please enter a directory to list the files of.\n");
-	else {
-		dp = opendir (str);
-		if (dp != NULL) {
-			while ((ep = readdir (dp)))
-				puts (ep->d_name);
-
-			(void) closedir (dp);
+			//Append output to file
+			else if (strcmp(args[2], ">>") == 0)
+			{
+				FILE *output = fopen(args[3], "a+");
+				while (fgets(paths, 1024, fp) != NULL)
+					fprintf(output, "%s", paths);
+				fclose(output);
+			}
+			pclose(fp);
 		}
 		else
-			perror ("Couldn't open the directory");
+			execlp("ls", "ls", "-al", args[1], NULL);
+	}
+	else
+	{
+		waitpid(pid, NULL, 0);
 	}
 }
 
 /*List all environment variables*/
-void envir_vars ()
+void envir_vars (char **args)
 {
 	int i = 0;
-	while (environ[i]) 
-		printf("%s\n", environ[i++]);
+
+	if (args[1] != NULL)
+	{
+		//Truncate file with env variables
+		if (strcmp(args[1], ">") == 0)
+		{
+			FILE *fp = fopen(args[2], "r+");
+			while (environ[i])
+				fprintf(fp, "%s\n", environ[i++]);
+			fclose(fp);
+		}
+
+		//Append env variables to file
+		else if (strcmp(args[1], ">>") == 0)
+		{
+			FILE *fp = fopen(args[2], "a+");
+			while (environ[i])
+				fprintf(fp, "%s\n", environ[i++]);
+			fclose(fp);
+		}
+	}
+	else
+	{
+		while (environ[i]) 
+			printf("%s\n", environ[i++]);
+	}
+
+	// printf("%s %s %s\n", args[0], args[1], args[2]);
 }
 
 /*Echo command*/
-void echo (int arg_count, char **str)
+void echo (int arg_count, char **args)
 {
+	char str[1024] = "";
+	int stdin_chk = 0, stdout_chk = 0;
 	for (int i = 1; i < arg_count; ++i)
-		printf("%s ", str[i]);
-	printf("\n");
+	{
+		if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
+		{
+			args[i] = NULL;
+			freopen(args[i+1], "r", stdin);
+			stdin_chk = 1;
+		}
+
+		//Truncating files
+		else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
+		{
+			args[i] = NULL;
+			FILE *fp = fopen(args[i+1], "w+");
+			fprintf(fp, "%s", str);
+			fclose (fp);
+			stdout_chk = 1;
+
+		}
+
+		//Appending to files
+		else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
+		{
+			args[i] = NULL;
+			FILE *fp = fopen(args[i+1], "a+");
+			fprintf(fp, "%s", str);
+			fclose (fp);
+			stdout_chk = 1;
+		}
+
+		//Append args to string until redirection occurs
+		if (stdin_chk == 0 && stdout_chk == 0)
+		{
+			strcat(str, args[i]);
+			strcat(str, " ");
+		}
+	}
+
+	//Print if there is no redirection
+	if (stdin_chk == 0 && stdout_chk == 0)
+	{
+		for (int i = 1; i < arg_count && args[i] != NULL; ++i)
+			printf("%s ", args[i]);
+
+		if (arg_count > 1)
+			printf("\n");
+	}
+	
 }
 
 /*Run shell script*/
@@ -127,11 +218,12 @@ void quit ()
 
 void external_command (int arg_count, char **args)
 {
-	//freopen("file", "r", stdin);
-
 	int pid = fork();
 	if (pid == 0)
 	{
+		//TODO - add PARENT=<pathname>/myshell to environment vars (putenv)
+
+
 		int stdin_chk = 0, stdout_chk = 0;
 		for (int i = 0; i < arg_count; ++i)
 		{
@@ -157,6 +249,7 @@ void external_command (int arg_count, char **args)
 			}
 		}
 		execvp(args[0], args);
+		printf("myshell: command not found: %s\n", args[0]);
 	}
 	else
 	{
@@ -168,10 +261,10 @@ void parse_input (int * arg_count, char *** args, char *str)
 {
 	char str_copy[1024];
 	strcpy(str_copy, str);
-	char * token_count = strtok(str_copy, " ");
+	char * token_count = strtok(str_copy, " \t");
 	while (token_count != NULL) {
 		(*arg_count)++;
-		token_count = strtok (NULL, " ");
+		token_count = strtok (NULL, " \t");
 	}
 
 	//Allocate memory for holding args
@@ -184,10 +277,10 @@ void parse_input (int * arg_count, char *** args, char *str)
 void store_args (int * arg_count, char * str, char *** args)
 {
 	// Store arguments in array of strings
-	char * token = strtok(str, " ");
+	char * token = strtok(str, " \t");
 	while (token != NULL) {
 		strcpy((*args)[(*arg_count)++], token);
-		token = strtok (NULL, " ");
+		token = strtok (NULL, " \t");
 	}
 }
 
@@ -205,11 +298,11 @@ void execute_commands (int arg_count, char ** args)
 
     	//Dir block - needs to support redirection
 	else if (strcmp(command, "dir") == 0)
-		dir(args[1]);
+		dir(args);
 
     	//Environ block - needs to support redirection
 	else if (strcmp(command, "environ") == 0)
-		envir_vars();
+		envir_vars(args);
 
     	//Echo block - needs to support redirection
 	else if (strcmp(command, "echo") == 0)

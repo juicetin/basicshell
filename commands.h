@@ -13,9 +13,9 @@
 
 void change_dir (char * str);
 void clear ();
-void dir (char *str);
+void dir (char **args);
 void envir_vars ();
-void echo (int arg_count, char **str);
+void echo (int arg_count, char **args);
 void shell(char **args);
 void help ();
 void shell_pause ();
