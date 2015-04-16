@@ -1,6 +1,6 @@
 *
 commands.*
-helpers.*
-main.c
-makefile
-readme
+!helpers.*
+!main.c
+!makefile
+!readme

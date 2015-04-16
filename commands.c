@@ -306,7 +306,7 @@ void external_command (int arg_count, char **args)
 	}
 	else
 	{
-		//Run in background
+		//Background execution
 		if (strcmp(args[arg_count-1], "&") == 0)
 		{
 			printf("[%d] %d\n", n_children++, pid);

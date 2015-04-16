@@ -3,7 +3,7 @@
 #TODO: Echo messages in colour!
 
 myshell: main.c commands.c commands.h helpers.c helpers.h
-	@gcc -std=c99 -Wall commands.c helpers.c main.c -o myshell
+	@clang -Wall commands.c helpers.c main.c -o myshell
 	@echo
 
 clean:
