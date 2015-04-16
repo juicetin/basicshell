@@ -1,7 +1,6 @@
-sample.sh
-.myshell.c.swp
-a.out
-*.o
-z
-myshell
-
+*
+commands.*
+helpers.*
+main.c
+makefile
+readme
