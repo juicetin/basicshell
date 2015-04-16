@@ -23,7 +23,7 @@ int main (int argc, char * argv[]) {
 			input = stdin;
 		}
 
-    	//Read user input and remove newline character
+		//Read command/script
 		char str[1024];
 		while (fgets(str, 1024, input) != NULL)
 		{

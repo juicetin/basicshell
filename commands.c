@@ -4,10 +4,16 @@
 #include "commands.h"
 
 /////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
 /////////// INTERNAL COMMANDS ///////////
 /////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
 
-/*i - Change directory*/
+//////////////////////////////
+//// i - Change directory ////
+//////////////////////////////
 void change_dir (char * str) {
 	
 	if (str == NULL)
@@ -21,12 +27,16 @@ void change_dir (char * str) {
 	}
 }
 
-/*ii - Clear terminal*/
+/////////////////////////////
+//// ii - Clear terminal ////
+/////////////////////////////
 void clear () {
 	printf("\033[2J\033[0;0H");
 }
 
-/*iii - List contents of specified directory*/
+////////////////////////////////////////////////////
+//// iii - List contents of specified directory ////
+////////////////////////////////////////////////////
 void dir (char **args)
 {
 	int pid = fork();
@@ -66,7 +76,9 @@ void dir (char **args)
 	}
 }
 
-/*iv - List all environment variables*/
+/////////////////////////////////////////////
+//// iv - List all environment variables ////
+/////////////////////////////////////////////
 void envir_vars (char **args)
 {
 	int i = 0;
@@ -96,11 +108,11 @@ void envir_vars (char **args)
 		while (environ[i]) 
 			printf("%s\n", environ[i++]);
 	}
-
-	// printf("%s %s %s\n", args[0], args[1], args[2]);
 }
 
-/*v - Echo command*/
+//////////////////////////
+//// v - Echo command ////
+//////////////////////////
 void echo (int arg_count, char **args)
 {
 	char str[1024] = "";
@@ -155,7 +167,9 @@ void echo (int arg_count, char **args)
 	
 }
 
-/*vi - Show manual*/
+//////////////////////////
+//// vi - Show manual ////
+//////////////////////////
 void help (char **args)
 {
 	int pid = fork();
@@ -194,7 +208,9 @@ void help (char **args)
 	}
 }
 
-/*vii - Pause terminal*/
+//////////////////////////////
+//// vii - Pause terminal ////
+//////////////////////////////
 void reset_input_mode (void) {
 	tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
 }
@@ -251,17 +267,25 @@ int shell_pause () //Broke naming convention to avoid conflict with stdlib.h lib
 	return EXIT_SUCCESS;
 }
 
-/*viii - Quit terminal*/
+//////////////////////////////
+//// viii - Quit terminal ////
+//////////////////////////////
 void quit ()
 {
 	exit(0);
 }
 
-
+/////////////////////////////////////////
+/////////////////////////////////////////
 /////////////////////////////////////////
 /////////// EXTERNAL COMMANDS ///////////
 /////////////////////////////////////////
+/////////////////////////////////////////
+/////////////////////////////////////////
 
+///////////////////////////
+//// External commands ////
+///////////////////////////
 void external_command (int arg_count, char **args)
 {
 	int pid = fork();
@@ -319,7 +343,9 @@ void external_command (int arg_count, char **args)
 	}
 }
 
-/*Run script using myshell*/
+//////////////////////////
+//// Script execution ////
+//////////////////////////
 void shell(char **args)
 {
 	if (args[1] == NULL)
