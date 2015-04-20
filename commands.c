@@ -37,6 +37,8 @@ void clear () {
 ////////////////////////////////////////////////////
 //// iii - List contents of specified directory ////
 ////////////////////////////////////////////////////
+
+//NEEDS TO SUPPORT TWO DIRECTORIES
 void dir (char **args)
 {
 	int pid = fork();
@@ -119,15 +121,8 @@ void echo (int arg_count, char **args)
 	int stdin_chk = 0, stdout_chk = 0;
 	for (int i = 1; i < arg_count; ++i)
 	{
-		if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
-		{
-			args[i] = NULL;
-			freopen(args[i+1], "r", stdin);
-			stdin_chk = 1;
-		}
-
 		//Truncating files
-		else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
+		if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
 		{
 			args[i] = NULL;
 			FILE *fp = fopen(args[i+1], "w+");
@@ -322,6 +317,11 @@ void external_command (int arg_count, char **args)
 				freopen(args[i+1], "a+", stdout);
 				stdout_chk = 1;
 			}
+		}
+
+		if (strcmp(args[arg_count-1], "&") == 0)
+		{
+			args[arg_count-1] = NULL;
 		}
 		execvp(args[0], args);
 
