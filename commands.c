@@ -3,6 +3,10 @@
 
 #include "commands.h"
 
+int n_children = 1;
+char cwd[1024];
+struct termios saved_attributes;
+
 /////////////////////////////////////////
 /////////////////////////////////////////
 /////////////////////////////////////////
@@ -56,7 +60,6 @@ void dir (char **args)
 				while (fgets(paths, 1024, fp) != NULL)
 					fprintf(output, "%s", paths);
 				fclose(output);
-				// pclose(fp);
 			}
 
 			//Append output to file

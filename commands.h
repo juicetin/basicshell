@@ -12,9 +12,8 @@
 #include <termios.h>
 
 extern char **environ;
-char cwd[1024];
-struct termios saved_attributes;
-int n_children;
+extern int n_children;
+extern char cwd[1024];
 
 //Internal
 void change_dir (char * str); 			//i

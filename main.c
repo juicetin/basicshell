@@ -4,11 +4,11 @@
 #include "helpers.h"
 #include "commands.h"
 
-n_children = 1;
-
-int main (int argc, char * argv[]) {
+int main (int argc, char * argv[])
+{
 	set_shell_path_envvar();
-	for (;;) {
+	for (;;)
+	{
 
 		//Prints user, domain, current directory
 		print_prompt_line();
@@ -42,7 +42,11 @@ int main (int argc, char * argv[]) {
 			if (command_check == 1)	break; //Escape if not reading script
 		}
 		printf("\n");
-		if (command_check == 0) exit(0);
+		
+		if (command_check == 0)
+		{
+			exit(0);
+		}
 	}
 	return 0;
 }
