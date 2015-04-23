@@ -4,10 +4,23 @@
 #include "helpers.h"
 #include "commands.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+
+static volatile int run = 1;
+
+void intHandler(int does_nothing)
+{
+	run = 1;
+}
+
 int main (int argc, char * argv[])
 {
 	set_shell_path_envvar();
-	for (;;)
+	signal(SIGINT, intHandler);
+	while (run)
 	{
 		//Prints user, domain, current directory
 		print_prompt_line();

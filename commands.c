@@ -3,6 +3,22 @@
 
 #include "commands.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <string.h>
+#include <termios.h>
+
+/*
+Note that the behaviour of the child process count
+here does not emulate that of a full-featured shell.
+The jtin2945-shell does not wait on signals to
+determine when a child process has completed to
+appropriately assign indices to new child processes,
+instead keeping a 'dumb' count of all new children
+that are open.
+*/
 int n_children = 1;
 char cwd[1024];
 struct termios saved_attributes;
@@ -78,36 +94,36 @@ void dir (int arg_count, char **args)
 /////////////////////////////////////////////
 //// iv - List all environment variables ////
 /////////////////////////////////////////////
-void envir_vars (char **args)
+void print(char *** args, char * file_mode)
 {
 	int i = 0;
+	FILE *fp = fopen((*args)[2], file_mode);
+	while (environ[i])
+	{
+		fprintf(fp, "%s\n", environ[i++]);
+	}
+	fclose(fp);
+}
 
+void envir_vars (char **args)
+{
 	if (args[1] != NULL)
 	{
 		//Truncate file with env variables
 		if (strcmp(args[1], ">") == 0)
 		{
-			FILE *fp = fopen(args[2], "w+");
-			while (environ[i])
-			{
-				fprintf(fp, "%s\n", environ[i++]);
-			}
-			fclose(fp);
+			print(&args, "w+");
 		}
 
 		//Append env variables to file
 		else if (strcmp(args[1], ">>") == 0)
 		{
-			FILE *fp = fopen(args[2], "a+");
-			while (environ[i])
-			{
-				fprintf(fp, "%s\n", environ[i++]);
-			}
-			fclose(fp);
+			print(&args, "a+");
 		}
 	}
 	else
 	{
+		int i = 0;
 		while (environ[i])
 		{
 			printf("%s\n", environ[i++]);
@@ -118,6 +134,15 @@ void envir_vars (char **args)
 //////////////////////////
 //// v - Echo command ////
 //////////////////////////
+void redirect_echo(char ***args, char *file_mode, char *str, int *std_chk, int i)
+{
+	(*args)[i] = NULL;
+	FILE *fp = fopen((*args)[i+1], file_mode);
+	fprintf(fp, "%s\n ", str);
+	fclose(fp);
+	(*std_chk) = 1;
+}
+
 void echo (int arg_count, char **args)
 {
 	char str[1024] = "";
@@ -127,21 +152,13 @@ void echo (int arg_count, char **args)
 		//Truncating files
 		if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
 		{
-			args[i] = NULL;
-			FILE *fp = fopen(args[i+1], "w+");
-			fprintf(fp, "%s", str);
-			fclose (fp);
-			stdout_chk = 1;
+			redirect_echo(&args, "w+", str, &stdout_chk, i);
 		}
 
 		//Appending to files
 		else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
 		{
-			args[i] = NULL;
-			FILE *fp = fopen(args[i+1], "a+");
-			fprintf(fp, "%s", str);
-			fclose (fp);
-			stdout_chk = 1;
+			redirect_echo(&args, "a+", str, &stdout_chk, i);
 		}
 
 		//Append args to string until redirection occurs
@@ -170,6 +187,16 @@ void echo (int arg_count, char **args)
 //////////////////////////
 //// vi - Show manual ////
 //////////////////////////
+void redirect_help(char ***args, char *file_mode, char *paths, FILE *fp)
+{
+	FILE *output = fopen((*args)[2], file_mode);
+	while (fgets(paths, 1024, fp) != NULL)
+	{
+		fprintf(output, "%s", paths);
+	}
+	fclose(output);
+}
+
 void help (char **args)
 {
 	int pid = fork();
@@ -183,23 +210,13 @@ void help (char **args)
 			//Truncate file with output
 			if (strcmp(args[1], ">") == 0)
 			{
-				FILE *output = fopen(args[2], "w+");
-				while (fgets(paths, 1024, fp) != NULL)
-				{
-					fprintf(output, "%s", paths);
-				}
-				fclose(output);
+				redirect_help(&args, "w+", paths, fp);
 			}
 
 			//Append output to file
 			else if (strcmp(args[1], ">>") == 0)
 			{
-				FILE *output = fopen(args[2], "a+");
-				while (fgets(paths, 1024, fp) != NULL)
-				{
-					fprintf(output, "%s", paths);
-				}
-				fclose(output);
+				redirect_help(&args, "a+", paths, fp);
 			}
 			pclose(fp);
 		}
@@ -247,7 +264,8 @@ void set_input_mode (void)
 	tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
 }
 
-int shell_pause () //Broke naming convention to avoid conflict with stdlib.h library
+//Broke naming convention to avoid conflict with stdlib.h library
+int shell_pause () 
 {
 	char c;
 	FILE * null_file = NULL;
@@ -297,6 +315,21 @@ void quit ()
 ///////////////////////////
 //// External commands ////
 ///////////////////////////
+void redirect_external (char *** args, FILE ** std, int * std_chk, char * file_mode, int i)
+{
+	(*args)[i] = NULL;
+	freopen((*args)[i+1], file_mode, (*std));
+	(*std_chk) = 1;
+}
+
+struct sigaction sigchld_action = {
+	//pointer to the SIG_DFL macro
+	.sa_handler = SIG_DFL,		
+
+	//when sig === SIGCHLD, prevents zombie proc on termination
+	.sa_flags = SA_NOCLDWAIT	
+};
+
 void external_command (int arg_count, char **args)
 {
 	int pid = fork();
@@ -309,28 +342,22 @@ void external_command (int arg_count, char **args)
 		int stdin_chk = 0, stdout_chk = 0;
 		for (int i = 0; i < arg_count; ++i)
 		{
-				//Take stdin
+			//Take stdin
 			if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
 			{
-				args[i] = NULL;
-				freopen(args[i+1], "r", stdin);
-				stdin_chk = 1;
+				redirect_external(&args, &stdin, &stdin_chk, "r", i);
 			}
 
-				//Truncate file
+			//Truncate file
 			else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
 			{
-				args[i] = NULL;
-				freopen(args[i+1], "w+", stdout);
-				stdout_chk = 1;
+				redirect_external(&args, &stdout, &stdout_chk, "w+", i);
 			}
 
-				//Append to file
+			//Append to file
 			else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
 			{
-				args[i] = NULL;
-				freopen(args[i+1], "a+", stdout);
-				stdout_chk = 1;
+				redirect_external(&args, &stdout, &stdout_chk, "a+", i);
 			}
 		}
 
@@ -348,6 +375,9 @@ void external_command (int arg_count, char **args)
 		if (strcmp(args[arg_count-1], "&") == 0)
 		{
 			printf("[%d] %d\n", n_children++, pid);
+
+			//prevent zombie procs
+			sigaction(SIGCHLD, &sigchld_action, NULL);	
 		}
 		else 
 		{
@@ -359,6 +389,9 @@ void external_command (int arg_count, char **args)
 //////////////////////////
 //// Script execution ////
 //////////////////////////
+
+//Note: will not process shell scripts 
+//correctly without a terminating newline at EOF
 void shell(char **args)
 {
 	if (args[1] == NULL)

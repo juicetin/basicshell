@@ -3,6 +3,11 @@
 
 #include "helpers.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
 void parse_input (int * arg_count, char *** args, char *str)
 {
 	char str_copy[1024];
