@@ -302,7 +302,6 @@ void external_command (int arg_count, char **args)
 	int pid = fork();
 	if (pid == 0)
 	{
-		//Add parent to environment variable in child
 		char parent[1024];
 		strcpy(parent, getenv("SHELL"));
 		setenv("PARENT", parent, 1);
@@ -310,7 +309,7 @@ void external_command (int arg_count, char **args)
 		int stdin_chk = 0, stdout_chk = 0;
 		for (int i = 0; i < arg_count; ++i)
 		{
-			//Take stdin
+				//Take stdin
 			if (strcmp(args[i], "<") == 0 && stdin_chk == 0)
 			{
 				args[i] = NULL;
@@ -318,7 +317,7 @@ void external_command (int arg_count, char **args)
 				stdin_chk = 1;
 			}
 
-			//Truncate file
+				//Truncate file
 			else if (strcmp(args[i], ">") == 0 && stdout_chk == 0)
 			{
 				args[i] = NULL;
@@ -326,7 +325,7 @@ void external_command (int arg_count, char **args)
 				stdout_chk = 1;
 			}
 
-			//Append to file
+				//Append to file
 			else if (strcmp(args[i], ">>") == 0 && stdout_chk == 0)
 			{
 				args[i] = NULL;
@@ -346,13 +345,11 @@ void external_command (int arg_count, char **args)
 	}
 	else
 	{
-		//Background execution
 		if (strcmp(args[arg_count-1], "&") == 0)
 		{
 			printf("[%d] %d\n", n_children++, pid);
 		}
-		//Wait for child to finish
-		else
+		else 
 		{
 			waitpid(pid, NULL, 0);
 		}
