@@ -7,6 +7,8 @@ void parse_input (int * arg_count, char *** args, char *str)
 {
 	char str_copy[1024];
 	strcpy(str_copy, str);
+
+	//Count items in command
 	char * token_count = strtok(str_copy, " \t");
 	while (token_count != NULL)
 	{
@@ -39,7 +41,7 @@ void execute_commands (int arg_count, char ** args)
 {
 	char command[1024];
 	memcpy(command, args[0], 1024);
-
+	
 	if (strcmp(command, "cd") == 0)
 	{
 		change_dir(args[1]);

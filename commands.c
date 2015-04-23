@@ -21,10 +21,15 @@ struct termios saved_attributes;
 void change_dir (char * str) {
 	
 	if (str == NULL)
+	{
 		printf("No directory entered. Current directory is: %s\n", cwd);
+	}
 	else if (chdir(str) != 0)
+	{
 		fprintf(stderr, "Directory does not exist. Please enter a valid directory.\n");
-	else {
+	}
+	else
+	{
 		//Change PWD environment variable
 		getcwd(cwd, sizeof(cwd));
 		setenv("PWD", cwd, 1);
@@ -34,7 +39,8 @@ void change_dir (char * str) {
 /////////////////////////////
 //// ii - Clear terminal ////
 /////////////////////////////
-void clear () {
+void clear ()
+{
 	printf("\033[2J\033[0;0H");
 }
 
@@ -42,38 +48,33 @@ void clear () {
 //// iii - List contents of specified directory ////
 ////////////////////////////////////////////////////
 
-//NEEDS TO SUPPORT TWO DIRECTORIES
 void dir (char **args)
 {
 	int pid = fork();
 	if (pid == 0)
 	{
-		if (args[2] != NULL)
+		int i = 0;
+		while (args[i] != NULL)
 		{
-			char paths[1024];
-			FILE *fp = popen("ls -al", "r");
-
-			//Truncate file with output
-			if (strcmp(args[2], ">") == 0)
+			if (strcmp(args[i], ">") == 0)
 			{
-				FILE *output = fopen(args[3], "w+");
-				while (fgets(paths, 1024, fp) != NULL)
-					fprintf(output, "%s", paths);
-				fclose(output);
+				args[i] = NULL;
+				freopen(args[i+1], "w", stdout);
+				break;
 			}
-
-			//Append output to file
-			else if (strcmp(args[2], ">>") == 0)
+			else if (strcmp(args[i], ">>") == 0)
 			{
-				FILE *output = fopen(args[3], "a+");
-				while (fgets(paths, 1024, fp) != NULL)
-					fprintf(output, "%s", paths);
-				fclose(output);
+				args[i] = NULL;
+				freopen(args[i+1], "a", stdout);
+				break;
 			}
-			pclose(fp);
+			else if (strcmp(args[i], "dir") != 0)
+			{
+
+			}
+			i++;
 		}
-		else
-			execlp("ls", "ls", "-al", args[1], NULL);
+		execvp(args[0], args);
 	}
 	else
 	{
@@ -95,7 +96,9 @@ void envir_vars (char **args)
 		{
 			FILE *fp = fopen(args[2], "w+");
 			while (environ[i])
+			{
 				fprintf(fp, "%s\n", environ[i++]);
+			}
 			fclose(fp);
 		}
 
@@ -104,14 +107,18 @@ void envir_vars (char **args)
 		{
 			FILE *fp = fopen(args[2], "a+");
 			while (environ[i])
+			{
 				fprintf(fp, "%s\n", environ[i++]);
+			}
 			fclose(fp);
 		}
 	}
 	else
 	{
-		while (environ[i]) 
+		while (environ[i])
+		{
 			printf("%s\n", environ[i++]);
+		}
 	}
 }
 
@@ -132,7 +139,6 @@ void echo (int arg_count, char **args)
 			fprintf(fp, "%s", str);
 			fclose (fp);
 			stdout_chk = 1;
-
 		}
 
 		//Appending to files
@@ -157,12 +163,15 @@ void echo (int arg_count, char **args)
 	if (stdin_chk == 0 && stdout_chk == 0)
 	{
 		for (int i = 1; i < arg_count && args[i] != NULL; ++i)
+		{
 			printf("%s ", args[i]);
+		}
 
 		if (arg_count > 1)
+		{
 			printf("\n");
+		}
 	}
-	
 }
 
 //////////////////////////
@@ -183,7 +192,9 @@ void help (char **args)
 			{
 				FILE *output = fopen(args[2], "w+");
 				while (fgets(paths, 1024, fp) != NULL)
+				{
 					fprintf(output, "%s", paths);
+				}
 				fclose(output);
 			}
 
@@ -192,13 +203,17 @@ void help (char **args)
 			{
 				FILE *output = fopen(args[2], "a+");
 				while (fgets(paths, 1024, fp) != NULL)
+				{
 					fprintf(output, "%s", paths);
+				}
 				fclose(output);
 			}
 			pclose(fp);
 		}
 		else
+		{
 			execlp("more", "more", "readme", NULL);
+		}
 	}
 	else
 	{
@@ -209,15 +224,20 @@ void help (char **args)
 //////////////////////////////
 //// vii - Pause terminal ////
 //////////////////////////////
-void reset_input_mode (void) {
+
+//REFERENCE THIS BLOCK OF CODE (the pause stuff)!
+void reset_input_mode (void)
+{
 	tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
 }
 
-void set_input_mode (void) {
+void set_input_mode (void)
+{
 	struct termios tattr;
 
 	/* Make sure stdin is a terminal. */
-	if (!isatty (STDIN_FILENO)) {
+	if (!isatty (STDIN_FILENO))
+	{
 		fprintf (stderr, "Not a terminal.\n");
 		exit (EXIT_FAILURE);
 	}

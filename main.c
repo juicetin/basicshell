@@ -9,7 +9,6 @@ int main (int argc, char * argv[])
 	set_shell_path_envvar();
 	for (;;)
 	{
-
 		//Prints user, domain, current directory
 		print_prompt_line();
 

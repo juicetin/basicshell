@@ -1,3 +1,4 @@
+# Makefile
 # Justin Ting, 430203826 - Operating Systems Internals Assignment 1
 # Monday 10am-12pm lab - Tutor: Jeshua
 
@@ -7,6 +8,7 @@ myshell: main.c commands.c commands.h helpers.c helpers.h
 
 clean:
 	@rm -f *.o
+	@rm myshell
 
 run:
 	@./myshell

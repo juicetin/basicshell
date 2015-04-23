@@ -18,7 +18,7 @@ extern char cwd[1024];
 //Internal
 void change_dir (char * str); 			//i
 void clear ();							//ii
-void dir (char **args);					//iii
+void dir (char **args);					//iii Note - supports infinite directory arguments
 void envir_vars ();						//iv
 void echo (int arg_count, char **args);	//v
 void help (char **args); 				//vi
