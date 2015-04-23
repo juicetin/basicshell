@@ -1,42 +1,132 @@
 # Justin Ting, 430203826 - Operating Systems Internals Assignment 1
 # Monday 10am-12pm lab - Tutor: Jeshua
 
+############################################################################################################################################
+
 jtin2945-shell
 
 Name
 	jtin2945-shell
 
+############################################################################################################################################
+
 Description
-	jtin2945-shell, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the University of Sydney.
+	jtin2945-shell, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the 
+	University of Sydney.
+
+############################################################################################################################################
 
 Reference
-The following sections of the manual describe the available built in (internal) commands.
+	The following sections of the manual describe the available built in (internal) commands.
 
-cd <directory>
-    Changes the current default directory to <directory>. 
-    If the <directory> argument is not present, the current working directory will be prompted so.
-    The PWD environment variable will be changed to match <directory>.
+cd [directory]
+	Changes the current default directory to [directory]. 
+	If the [directory] argument is not present, the current working directory will be printed.
+	If the [directory] argument points to a non-existent directory, an error will be printed and normal operation resumes.
+	The PWD environment variable will be changed to match [directory].
 
 clr
-    Clears the terminal screen.
-    No arguments needed.
+	Clears the terminal screen.
+	No arguments needed.
 
-dir <directories>
-    Lists the contents of the directory <directory>.
-    If the <directory> argument is not present, the current directory's contents will be listed.
-    <directories> accepts an infinite number of directories and each block will be seprated with a newline.
+dir [directories]
+	Lists the contents of the directory [directory].
+	If the [directories] argument is not present, the current directory's contents will be listed.
+	If the [directories] argument contains one or more invalid directories, all valid ones will have their contents printed, but 
+	also with an error message indicating all the invalid directories.
+	[directories] accepts an infinite number of directories and each block will be seprated with a newline.
 
 environ
 	Lists all environment variables
+	No arguments needed.
 
-echo <comment>
-	Displays <comment< on the display followed by a new line (where multiple spaces/tabs are reduced to a single space)
+echo [argments]
+	Displays [comment[ on the display followed by a new line (where multiple spaces/tabs are reduced to a single space)
+	If [arguments] is not provided, simply a new line will be printed.
+	Accepts any number of space-separated arguments.
 
 help
-	Display the user manual, using the more filter
+	Display the user manual, using the more filter.
+	No arguments needed.
 
 pause
-	Pause operation of the Shell until the 'Enter' key is pressed
+	Pause operation of the Shell until the 'Enter' key is pressed. No input of any sort are permitted and any key input will not be 
+	displayed on the screen.
+	No arguments needed.
 
 quit
-	Quits the shell
+	Quits the shell.
+	No arguments needed.
+
+############################################################################################################################################
+
+External execution
+	
+	Non-internally supported commands
+		External commands are also available. As the jtin2945-shell is run from within an existing shell environment (such as bash or zsh),
+		all commands that are run from within the jtin2945-shell that aren't supported internally will attempt to be run externally.
+
+		This is done by spawning a child process, then executing the now-external command in that child-process - if it is a valid external
+		command, the external environment will execute it as if it was run within it, then once that command has finished running, the
+		child will finish, exit, and return to the parent process - the jtin2945-shell. If an invaild command attempts to run this way, the
+		user will be prompted with an error message.
+
+	Scripts
+		syntax: myshell [script file]
+
+		Scripts can be either run from within the shell using the above syntax, at which point the file will be run, then quit the jtin2945
+		shell afterwards, or from the external environment:
+
+			syntax: ./myshell [script file]
+
+		Once the script exists the user will be returned to their original external environment.
+
+############################################################################################################################################
+
+Environment concepts
+	
+	
+############################################################################################################################################
+
+Redirection
+	Redirection refers taking the output of a command/script/file/etc. and sending it as input for another command/script/file/etc. There
+	are three basic operators for performing redirection that are supported in jtin2945-shell. The supported redirection revolves around
+	modifying standard input (stdin) and standard (output) (standard error (stderr) also exists but it is currently unsupported in jtin2945-
+	shell). Stdin and stdout are simply files that are always (by default) open - and redirection allows the files they represent to be 
+	modified.
+		
+		< allows standard input (stdin) redirection, where the output from the right of the ">" is given as input to what is on the left of
+		the "<". Take the simple command "echo" for example - if a file "foo.txt" contains the text "bar", then echo < a would print
+		"bar" to the terminal.
+
+		> allows standard output (stdout) redirection, where the output from the left of the ">" is redirected as input to what is on the
+		right of the ">". For example, echo foo > bar.txt would write the text "foo" to a file called bar.txt. The ">"
+		redirection operator truncates files - if the file to the right of the ">" did not exist, one will be created and written to. If
+		it already existed, however, the file will be wiped clean before the new contents are written to it. This is called truncating.
+
+		>> also allows standard output (stdout) redirection. However, the difference is that rather than overwrite an existing file, it
+		will append to it. That is, it will the contents to the left of the ">>" to the bottom of the file on the right of the ">>". For
+		example, if a file "foo.txt" contains the text "bar", then echo fizzbuzz >> foo.txt will modify the contents of foo.txt to be:
+			bar
+			fizzbuzz
+
+############################################################################################################################################
+
+Background execution
+	syntax: [args...] &
+			[args...] [redirection and further args as appropriate] &
+				[args...] < [arg] &
+				[args...] >> [arg] &
+				[args...] > [arg] & 
+				[args...] < [arg] > [arg] &
+				[args...] < [arg] >> [arg] &
+				etc...
+
+	Background execution in the jtin2945-shell is only supported for externally executed non-internal commmands (and not scripts run using
+	the jtin2945-shell). As explained in the external commands section, under normal operation they are run in spawned child processes. But
+	if background execution is used, rather than the parent waiting for its child (external, in this case) process to finish, the job will
+	immediately be sent to the background and the user will return to the parent.
+
+	The job will then silently finish in the background, allowing the user to continue normal operations in the jtin2945-shell as they wish.
+	Upon running a command using background execution, the user will be prompted with the current number of child processes, as well as the
+	process ID of the process that was sent to the background.
