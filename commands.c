@@ -48,32 +48,25 @@ void clear ()
 //// iii - List contents of specified directory ////
 ////////////////////////////////////////////////////
 
-void dir (char **args)
+void dir (int arg_count, char **args)
 {
 	int pid = fork();
 	if (pid == 0)
-	{
-		int i = 0;
-		while (args[i] != NULL)
+	{	
+		for (int i = 0; i < arg_count; ++i)
 		{
 			if (strcmp(args[i], ">") == 0)
 			{
 				args[i] = NULL;
 				freopen(args[i+1], "w", stdout);
-				break;
 			}
 			else if (strcmp(args[i], ">>") == 0)
 			{
 				args[i] = NULL;
 				freopen(args[i+1], "a", stdout);
-				break;
 			}
-			else if (strcmp(args[i], "dir") != 0)
-			{
-
-			}
-			i++;
 		}
+		args[arg_count] = NULL;
 		execvp(args[0], args);
 	}
 	else

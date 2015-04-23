@@ -9,24 +9,22 @@ Name
 Description
 	jtin2945-shell, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the University of Sydney.
 
-Options
-	Unfortunately, I did not implement options...D=
-
-
-
 Reference
-The following sections of the manual describe the available built in commands.
+The following sections of the manual describe the available built in (internal) commands.
 
 cd <directory>
-    Changes the current default directory to <directory>. If the <directory> argument is not present, 
-    the current working directory will be printed. An invalid <directory> will result in the user being 
-    prompted so.
+    Changes the current default directory to <directory>. 
+    If the <directory> argument is not present, the current working directory will be prompted so.
+    The PWD environment variable will be changed to match <directory>.
 
 clr
     Clears the terminal screen.
+    No arguments needed.
 
-dir <directory>
+dir <directories>
     Lists the contents of the directory <directory>.
+    If the <directory> argument is not present, the current directory's contents will be listed.
+    <directories> accepts an infinite number of directories and each block will be seprated with a newline.
 
 environ
 	Lists all environment variables

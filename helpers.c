@@ -56,7 +56,7 @@ void execute_commands (int arg_count, char ** args)
     //Dir block - needs to support redirection
 	else if (strcmp(command, "dir") == 0)
 	{
-		dir(args);
+		dir(arg_count, args);
 	}
 
     //Environ block - needs to support redirection
@@ -69,12 +69,6 @@ void execute_commands (int arg_count, char ** args)
 	else if (strcmp(command, "clr") == 0)
 	{
 		clear();
-	}
-
-    //Dir block - needs to support redirection
-	else if (strcmp(command, "dir") == 0)
-	{
-		dir(args);
 	}
 
     //Echo block - needs to support redirection
