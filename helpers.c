@@ -127,10 +127,7 @@ void execute_commands (int arg_count, char ** args)
 void set_shell_path_envvar()
 {
 	getcwd(cwd, sizeof(cwd));
-	char shell_path[1024] = "";
-	strcat(shell_path, cwd);
-	strcat(shell_path, "/myshell");
-	setenv("SHELL", shell_path, 1);
+	setenv("SHELL", cwd, 1);
 }
 
 void print_prompt_line ()

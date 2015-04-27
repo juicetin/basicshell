@@ -9,8 +9,8 @@
 #include <string.h>
 #include <signal.h>
 
+//Trap Ctrl+C
 static volatile int run = 1;
-
 void intHandler(int does_nothing)
 {
 	run = 1;

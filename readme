@@ -3,75 +3,101 @@
 
 ############################################################################################################################################
 
-jtin2945-shell
+MYSHELL
 
 Name
-	jtin2945-shell
+	MYSHELL
 
 ############################################################################################################################################
 
-Description
-	jtin2945-shell, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the 
+DESCRIPTION
+	
+	MYSHELL, a very basic shell with minimal functionality designed for the Operating Systems Internals (COMP3520) unit at the 
 	University of Sydney.
 
 ############################################################################################################################################
 
-Reference
-	The following sections of the manual describe the available built in (internal) commands.
+SHELL INVOCATION
+	
+	The shell can be invoked in one of two ways - by either launching the shell itself by running myshell:
 
-cd [directory]
-	Changes the current default directory to [directory]. 
-	If the [directory] argument is not present, the current working directory will be printed.
-	If the [directory] argument points to a non-existent directory, an error will be printed and normal operation resumes.
-	The PWD environment variable will be changed to match [directory].
+		./myshell
 
-clr
-	Clears the terminal screen.
-	No arguments needed.
+	Or for one-time use in running batch files, using:
 
-dir [directories]
-	Lists the contents of the directory [directory].
-	If the [directories] argument is not present, the current directory's contents will be listed.
-	If the [directories] argument contains one or more invalid directories, all valid ones will have their contents printed, but 
-	also with an error message indicating all the invalid directories.
-	[directories] accepts an infinite number of directories and each block will be seprated with a newline.
+		./myshell <batch-file>
 
-environ
-	Lists all environment variables
-	No arguments needed.
+	Doing the former will allow all commands detailed below to be run within the MYSHELL environment. Note however, that whether batch
+	files are run from an external environment using the above latter method or from within the MYSHELL environment, it will quit once
+	the batch file execution has ended.
 
-echo [argments]
-	Displays [comment[ on the display followed by a new line (where multiple spaces/tabs are reduced to a single space)
-	If [arguments] is not provided, simply a new line will be printed.
-	Accepts any number of space-separated arguments.
+	The shell doesn't have to be invoked from the directory in which the executable exists - it can be run from any directory:
 
-help
-	Display the user manual, using the more filter.
-	No arguments needed.
+		./<path-other-than-executable-path>/myshell
 
-pause
-	Pause operation of the Shell until the 'Enter' key is pressed. No input of any sort are permitted and any key input will not be 
-	displayed on the screen.
-	No arguments needed.
-
-quit
-	Quits the shell.
-	No arguments needed.
+	IMPORTANT - the help command will not function if MYSHELL is invoked from outside the executable directory, but all other commands
+	will function as expected.
 
 ############################################################################################################################################
 
-External execution
+INTERNAL COMMANDS
 	
-	Non-internally supported commands
-		External commands are also available. As the jtin2945-shell is run from within an existing shell environment (such as bash or zsh),
-		all commands that are run from within the jtin2945-shell that aren't supported internally will attempt to be run externally.
+	The following section describes the use of internal commands, the arguments required, default behaviours, and their actual function.
+
+
+	cd [directory]
+		Changes the current default directory to [directory]. 
+		If the [directory] argument is not present, the current working directory will be printed. Extra arguments will be ignored.
+		If the [directory] argument points to a non-existent directory, an error will be printed and normal operation resumes.
+		The PWD environment variable will be changed to match [directory].
+
+	clr
+		Clears the terminal screen.
+		No arguments needed, extra arguments will be ignored.
+
+	dir [directories]
+		Lists the contents of the directory [directory].
+		If the [directories] argument is not present, the current directory's contents will be listed.
+		If the [directories] argument contains one or more invalid directories, all valid ones will have their contents printed, but 
+		also with an error message indicating all the invalid directories.
+		[directories] accepts an infinite number of directories and each block will be seprated with a newline.
+
+	environ
+		Lists all environment variables
+		No arguments needed, extra arguments will be ignored..
+
+	echo [argments]
+		Displays [comment[ on the display followed by a new line (where multiple spaces/tabs are reduced to a single space)
+		If [arguments] is not provided, simply a new line will be printed.
+		Accepts any number of space-separated arguments.
+
+	help
+		Display the user manual, using the more filter.
+		No arguments needed, extra arguments will be ignored.
+
+	pause
+		Pause operation of the Shell until the 'Enter' key is pressed. No input of any sort are permitted and any key input will not be 
+		displayed on the screen.
+		No arguments needed, extra arguments will be ignored.
+
+	quit
+		Quits the shell.
+		No arguments needed, extra arguments will be ignored..
+
+############################################################################################################################################
+
+EXTERNAL EXECUTION
+	
+	NON-INTERNALLY SUPPORTED COMMANDS
+		External commands are also available. As the MYSHELL is run from within an existing shell environment (such as bash or zsh),
+		all commands that are run from within the MYSHELL that aren't supported internally will attempt to be run externally.
 
 		This is done by spawning a child process, then executing the now-external command in that child-process - if it is a valid external
 		command, the external environment will execute it as if it was run within it, then once that command has finished running, the
-		child will finish, exit, and return to the parent process - the jtin2945-shell. If an invaild command attempts to run this way, the
+		child will finish, exit, and return to the parent process - the MYSHELL. If an invaild command attempts to run this way, the
 		user will be prompted with an error message.
 
-	Scripts
+	BATCH FILES
 		syntax: myshell [script file]
 
 		Scripts can be either run from within the shell using the above syntax, at which point the file will be run, then quit the jtin2945
@@ -83,14 +109,27 @@ External execution
 
 ############################################################################################################################################
 
-Environment concepts
+ENVIRONMENT CONCEPTS
 	
+	The shell environment, or in this case, MYSHELL environment, is essentially a bunch of information, but more specifically, a list of
+	'environment variables' that is used by both command line commands/utilities as well as programs for configuration purposes. These 
+	variables allow the exchange of information between the shell and the programs it executes. MYSHELL is one instance of of a shell - 
+	environment variables would allow, for example, for a defaut shell to be set (SHELL=default-shell) so when a terminal is launched the 
+	correct one is automatically loaded. 
 	
+	The information stored are of both a global and local nature - the former being accessible by both a shell and all its children (and their 
+	chldren), while the local ones, 'shell variables', are contained within a local shell session.
+
+	Both programs and users can modify the environment - a program, for example, may be spawned in a child process, and want to modify its
+	working directory to a user-defined one to be able to read input and print output to a location other than the parent's process'
+	directory.
+
 ############################################################################################################################################
 
-Redirection
+REDIRECTION
+	
 	Redirection refers taking the output of a command/script/file/etc. and sending it as input for another command/script/file/etc. There
-	are three basic operators for performing redirection that are supported in jtin2945-shell. The supported redirection revolves around
+	are three basic operators for performing redirection that are supported in MYSHELL. The supported redirection revolves around
 	modifying standard input (stdin) and standard (output) (standard error (stderr) also exists but it is currently unsupported in jtin2945-
 	shell). Stdin and stdout are simply files that are always (by default) open - and redirection allows the files they represent to be 
 	modified.
@@ -110,9 +149,19 @@ Redirection
 			bar
 			fizzbuzz
 
+
+	Only one instance of stdin and stdout redirection respectively are supported per command - and will apply on the argument immediately
+	following the redirection symbol.
+
+		For example, in:
+
+			command a < c > d < e >> f
+
+	Only the output from "c" will be redirected as input for "a", and the result redirected to stdout at "d".
+
 ############################################################################################################################################
 
-Background execution
+BACKGROUND EXECUTION
 	syntax: [args...] &
 			[args...] [redirection and further args as appropriate] &
 				[args...] < [arg] &
@@ -122,11 +171,14 @@ Background execution
 				[args...] < [arg] >> [arg] &
 				etc...
 
-	Background execution in the jtin2945-shell is only supported for externally executed non-internal commmands (and not scripts run using
-	the jtin2945-shell). As explained in the external commands section, under normal operation they are run in spawned child processes. But
+	Background execution is enabled by including the ampersand (&) symbol as the last argument.
+
+	Background execution in the MYSHELL is only supported for externally executed non-internal commmands (and not scripts run using
+	the MYSHELL). As explained in the external commands section, under normal operation they are run in spawned child processes. But
 	if background execution is used, rather than the parent waiting for its child (external, in this case) process to finish, the job will
 	immediately be sent to the background and the user will return to the parent.
 
-	The job will then silently finish in the background, allowing the user to continue normal operations in the jtin2945-shell as they wish.
+	The job will then silently finish in the background, allowing the user to continue normal operations in the MYSHELL as they wish.
 	Upon running a command using background execution, the user will be prompted with the current number of child processes, as well as the
 	process ID of the process that was sent to the background.
+	

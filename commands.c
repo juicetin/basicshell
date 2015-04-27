@@ -71,19 +71,39 @@ void dir (int arg_count, char **args)
 	{	
 		for (int i = 0; i < arg_count; ++i)
 		{
+			//stdout redirection
 			if (strcmp(args[i], ">") == 0)
 			{
 				args[i] = NULL;
 				freopen(args[i+1], "w", stdout);
+				arg_count = i;
+				break;
 			}
 			else if (strcmp(args[i], ">>") == 0)
 			{
 				args[i] = NULL;
 				freopen(args[i+1], "a", stdout);
+				arg_count = i;
+				break;
 			}
 		}
 		args[arg_count] = NULL;
-		execvp(args[0], args);
+
+		//Modify args to use ls -al to fit requirements
+		char **args_lsal = calloc(arg_count+1, sizeof(char**));
+		for (int i = 0; i < arg_count+1; ++i)
+		{
+			args_lsal[i] = calloc(256, sizeof(char*));
+		}
+		for (int i = arg_count; i > 1; --i)
+		{
+			strcpy(args_lsal[i], args[i-1]);
+		}
+		strcpy(args_lsal[0], "ls");
+		strcpy(args_lsal[1], "-al");
+		args_lsal[arg_count+1] = NULL;
+
+		execvp(args_lsal[0], args_lsal);
 	}
 	else
 	{
@@ -222,7 +242,10 @@ void help (char **args)
 		}
 		else
 		{
-			execlp("more", "more", "readme", NULL);
+			char readme_path[1024];
+			strcpy(readme_path, getenv("SHELL"));
+			strcat(readme_path, "/readme");
+			execlp("more", "more", readme_path, NULL);
 		}
 	}
 	else
@@ -323,7 +346,7 @@ void redirect_external (char *** args, FILE ** std, int * std_chk, char * file_m
 }
 
 struct sigaction sigchld_action = {
-	//pointer to the SIG_DFL macro
+	//pointer to the SIG_DFL macro, default signal handling
 	.sa_handler = SIG_DFL,		
 
 	//when sig === SIGCHLD, prevents zombie proc on termination
@@ -335,6 +358,7 @@ void external_command (int arg_count, char **args)
 	int pid = fork();
 	if (pid == 0)
 	{
+		//Set location of parent shell in child environment
 		char parent[1024];
 		strcpy(parent, getenv("SHELL"));
 		setenv("PARENT", parent, 1);
@@ -361,14 +385,11 @@ void external_command (int arg_count, char **args)
 			}
 		}
 
-		if (strcmp(args[arg_count-1], "&") == 0)
-		{
-			args[arg_count-1] = NULL;
-		}
 		execvp(args[0], args);
 
 		//Print error if execvp fails
 		fprintf(stderr, "myshell: command not found: %s\n", args[0]);
+		exit(0);	//Prevent extra myshell process spawning on fail
 	}
 	else
 	{
